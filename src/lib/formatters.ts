@@ -22,7 +22,10 @@ export function formatINR(amount: number, options: { compact?: boolean } = {}): 
  * @param decimals Number of decimal places
  * @returns Formatted percentage string
  */
-export function formatPercent(value: number, decimals: number = 1): string {
+export function formatPercent(value: number | undefined | null, decimals: number = 1): string {
+  if (value === undefined || value === null) {
+    return '0.0%';
+  }
   return `${value.toFixed(decimals)}%`;
 }
 

@@ -8,7 +8,7 @@ import { getBrandCampaigns, getCampaignPerformance } from "@/services/mockData";
 const BrandAnalytics: React.FC = () => {
   const { user } = useAuth();
   const campaigns = getBrandCampaigns(user?.user_id || "");
-  const metrics = campaigns.map(campaign => getCampaignPerformance(campaign.campaign_id));
+  const metrics = campaigns.map(campaign => getCampaignPerformance(campaign.campaign_id)).filter(metric => metric !== undefined);
   
   return (
     <MainLayout requiredRole="brand">
