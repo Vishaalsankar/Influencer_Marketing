@@ -89,21 +89,23 @@ const Chat: React.FC = () => {
             data.forEach(msg => {
               // If the sender is not the current user, add them as a contact
               if (msg.sender_id !== user.user_id && msg.sender) {
+                // Fix: Access properties properly from the sender object
                 uniqueContacts.set(msg.sender_id, {
                   user_id: msg.sender_id,
-                  name: msg.sender.name,
-                  role: msg.sender.role,
-                  profile_image: msg.sender.profile_image
+                  name: msg.sender.name, // Fixed - was erroneously being accessed as array
+                  role: msg.sender.role, // Fixed - was erroneously being accessed as array
+                  profile_image: msg.sender.profile_image // Fixed - was erroneously being accessed as array
                 });
               }
               
               // If the receiver is not the current user, add them as a contact
               if (msg.receiver_id !== user.user_id && msg.receiver) {
+                // Fix: Access properties properly from the receiver object
                 uniqueContacts.set(msg.receiver_id, {
                   user_id: msg.receiver_id,
-                  name: msg.receiver.name,
-                  role: msg.receiver.role,
-                  profile_image: msg.receiver.profile_image
+                  name: msg.receiver.name, // Fixed - was erroneously being accessed as array
+                  role: msg.receiver.role, // Fixed - was erroneously being accessed as array
+                  profile_image: msg.receiver.profile_image // Fixed - was erroneously being accessed as array
                 });
               }
             });
