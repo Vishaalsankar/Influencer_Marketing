@@ -14,7 +14,13 @@ const BrandInfluencerSearch: React.FC = () => {
   const { toast } = useToast();
 
   const handleChatWithInfluencer = (influencer: Influencer) => {
+    // Navigate to chat with this influencer
     navigate(`/brand/chat?contact=${influencer.user_id}&name=${encodeURIComponent(influencer.name)}`);
+    
+    toast({
+      title: "Chat initiated",
+      description: `Starting conversation with ${influencer.name}`,
+    });
   };
 
   const handleSelectionChange = (influencers: Influencer[]) => {
