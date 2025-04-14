@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { LogOut, BarChart2, Users, AlertTriangle, Search, Campaign, User, BadgeDollarSign } from "lucide-react";
+import { LogOut, BarChart2, Users, AlertTriangle, Search, Megaphone, User, BadgeDollarSign } from "lucide-react";
 
 const AppSidebar: React.FC = () => {
   const { user, logout, userRole } = useAuth();
@@ -67,7 +67,7 @@ const AppSidebar: React.FC = () => {
                       to="/admin/campaigns" 
                       className={location.pathname === "/admin/campaigns" ? "text-primary" : ""}
                     >
-                      <Campaign size={18} />
+                      <Megaphone size={18} />
                       <span>Campaigns</span>
                     </Link>
                   </SidebarMenuButton>
@@ -110,7 +110,7 @@ const AppSidebar: React.FC = () => {
                       to="/brand" 
                       className={location.pathname === "/brand" ? "text-primary" : ""}
                     >
-                      <Campaign size={18} />
+                      <Megaphone size={18} />
                       <span>Campaigns</span>
                     </Link>
                   </SidebarMenuButton>
@@ -164,7 +164,7 @@ const AppSidebar: React.FC = () => {
                       to="/influencer/campaigns" 
                       className={location.pathname === "/influencer/campaigns" ? "text-primary" : ""}
                     >
-                      <Campaign size={18} />
+                      <Megaphone size={18} />
                       <span>Campaigns</span>
                     </Link>
                   </SidebarMenuButton>
