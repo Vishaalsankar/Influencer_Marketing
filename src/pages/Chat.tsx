@@ -9,7 +9,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Send, MessageCircle } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/lib/supabase";
+import { supabase, createMockMessages } from "@/lib/supabase";
 
 type Message = {
   id: string;
@@ -36,6 +36,13 @@ const Chat: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Initialize mock data on component mount
+  useEffect(() => {
+    if (user) {
+      createMockMessages().catch(console.error);
+    }
+  }, [user]);
 
   // Get contact info from URL params if available
   useEffect(() => {
@@ -89,23 +96,21 @@ const Chat: React.FC = () => {
             data.forEach(msg => {
               // If the sender is not the current user, add them as a contact
               if (msg.sender_id !== user.user_id && msg.sender) {
-                // Fix: Access properties properly from the sender object
                 uniqueContacts.set(msg.sender_id, {
                   user_id: msg.sender_id,
-                  name: msg.sender.name, // Fixed - was erroneously being accessed as array
-                  role: msg.sender.role, // Fixed - was erroneously being accessed as array
-                  profile_image: msg.sender.profile_image // Fixed - was erroneously being accessed as array
+                  name: msg.sender.name, // Use dot notation for accessing properties
+                  role: msg.sender.role,
+                  profile_image: msg.sender.profile_image
                 });
               }
               
               // If the receiver is not the current user, add them as a contact
               if (msg.receiver_id !== user.user_id && msg.receiver) {
-                // Fix: Access properties properly from the receiver object
                 uniqueContacts.set(msg.receiver_id, {
                   user_id: msg.receiver_id,
-                  name: msg.receiver.name, // Fixed - was erroneously being accessed as array
-                  role: msg.receiver.role, // Fixed - was erroneously being accessed as array
-                  profile_image: msg.receiver.profile_image // Fixed - was erroneously being accessed as array
+                  name: msg.receiver.name, // Use dot notation for accessing properties
+                  role: msg.receiver.role,
+                  profile_image: msg.receiver.profile_image
                 });
               }
             });
