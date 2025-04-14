@@ -11,7 +11,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useAuth } from "@/contexts/AuthContext";
 import { mockInfluencers } from "@/services/mockData";
 import { formatINR, formatNumber, formatPercent } from "@/lib/formatters";
-import { InfluencerCategory } from "@/types";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { InfluencerCategory, InfluencerNiche } from "@/types";
+import { Checkbox } from "@/components/ui/checkbox";
+import { toast } from "@/components/ui/use-toast";
 
 const InfluencerPortal: React.FC = () => {
   const { user } = useAuth();
@@ -40,14 +43,48 @@ const InfluencerPortal: React.FC = () => {
     influencerProfile?.engagement_rate.toString() || "5.2"
   );
   const [bio, setBio] = React.useState(
-    "I'm a lifestyle influencer passionate about fashion and beauty products."
+    influencerProfile?.bio || "I'm a lifestyle influencer passionate about fashion and beauty products."
+  );
+  
+  const [profileImage, setProfileImage] = React.useState<string>(
+    influencerProfile?.profile_image || "/placeholder.svg"
+  );
+  
+  const [selectedNiches, setSelectedNiches] = React.useState<InfluencerNiche[]>(
+    influencerProfile?.niches || ["fashion", "beauty"]
   );
   
   const [isEditing, setIsEditing] = React.useState(false);
   
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        if (event.target?.result) {
+          setProfileImage(event.target.result as string);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+  
+  const handleNicheChange = (niche: InfluencerNiche) => {
+    if (selectedNiches.includes(niche)) {
+      setSelectedNiches(selectedNiches.filter(n => n !== niche));
+    } else {
+      setSelectedNiches([...selectedNiches, niche]);
+    }
+  };
+  
   const handleSave = () => {
     // In a real app, this would call an API to update the profile
     setIsEditing(false);
+    toast({
+      title: "Profile updated",
+      description: "Your profile has been updated successfully.",
+    });
   };
   
   return (
@@ -81,14 +118,14 @@ const InfluencerPortal: React.FC = () => {
               <CardContent>
                 {!isEditing ? (
                   <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="flex items-center gap-4 mb-6">
+                      <Avatar className="h-24 w-24 border-2 border-primary/10">
+                        <AvatarImage src={profileImage} alt={user?.name || "Profile"} />
+                        <AvatarFallback className="text-lg">{user?.name?.substring(0, 2).toUpperCase()}</AvatarFallback>
+                      </Avatar>
                       <div>
-                        <h3 className="text-sm font-medium text-muted-foreground">Name</h3>
-                        <p className="text-base">{user?.name}</p>
-                      </div>
-                      <div>
-                        <h3 className="text-sm font-medium text-muted-foreground">Email</h3>
-                        <p className="text-base">{user?.email}</p>
+                        <h2 className="text-xl font-semibold">{user?.name}</h2>
+                        <p className="text-muted-foreground">{user?.email}</p>
                       </div>
                     </div>
                     
@@ -108,6 +145,17 @@ const InfluencerPortal: React.FC = () => {
                     <div>
                       <h3 className="text-sm font-medium text-muted-foreground">Bio</h3>
                       <p className="text-base">{bio}</p>
+                    </div>
+                    
+                    <div>
+                      <h3 className="text-sm font-medium text-muted-foreground">Niches</h3>
+                      <div className="flex flex-wrap gap-2 mt-1">
+                        {selectedNiches.map(niche => (
+                          <Badge key={niche} variant="outline" className="capitalize">
+                            {niche}
+                          </Badge>
+                        ))}
+                      </div>
                     </div>
                     
                     <div>
@@ -132,14 +180,34 @@ const InfluencerPortal: React.FC = () => {
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="name">Name</Label>
-                        <Input id="name" value={user?.name} disabled />
+                    <div className="flex flex-col items-center sm:flex-row sm:items-start gap-4 mb-6">
+                      <div className="flex flex-col items-center gap-2">
+                        <Avatar className="h-24 w-24 border-2 border-primary/10">
+                          <AvatarImage src={profileImage} alt={user?.name || "Profile"} />
+                          <AvatarFallback className="text-lg">{user?.name?.substring(0, 2).toUpperCase()}</AvatarFallback>
+                        </Avatar>
+                        <Button variant="outline" size="sm" className="mt-2" asChild>
+                          <Label htmlFor="profileImage" className="cursor-pointer">
+                            Upload Image
+                            <Input 
+                              id="profileImage" 
+                              type="file" 
+                              accept="image/*" 
+                              className="hidden" 
+                              onChange={handleImageUpload}
+                            />
+                          </Label>
+                        </Button>
                       </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="email">Email</Label>
-                        <Input id="email" value={user?.email} disabled />
+                      <div className="grid grid-cols-2 gap-4 flex-grow">
+                        <div className="space-y-2">
+                          <Label htmlFor="name">Name</Label>
+                          <Input id="name" value={user?.name} disabled />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="email">Email</Label>
+                          <Input id="email" value={user?.email} disabled />
+                        </div>
                       </div>
                     </div>
                     
@@ -183,6 +251,27 @@ const InfluencerPortal: React.FC = () => {
                         placeholder="Tell brands about yourself"
                         rows={3}
                       />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label>Niches (Select all that apply)</Label>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-2">
+                        {['fitness', 'food', 'cosmetics', 'tech', 'travel', 'vlog', 'fashion', 'beauty', 'lifestyle', 'gaming', 'education'].map((niche) => (
+                          <div key={niche} className="flex items-center space-x-2">
+                            <Checkbox 
+                              id={`niche-${niche}`} 
+                              checked={selectedNiches.includes(niche as InfluencerNiche)} 
+                              onCheckedChange={() => handleNicheChange(niche as InfluencerNiche)}
+                            />
+                            <label
+                              htmlFor={`niche-${niche}`}
+                              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 capitalize"
+                            >
+                              {niche}
+                            </label>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                     
                     <div className="space-y-2">

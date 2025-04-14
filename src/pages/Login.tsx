@@ -1,7 +1,7 @@
 
 import React, { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { Navigate } from "react-router-dom";
+import { Navigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -95,6 +95,14 @@ const Login: React.FC = () => {
             </form>
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">
+            <div className="text-center w-full">
+              <p className="text-sm text-muted-foreground">
+                Don't have an account?{" "}
+                <Link to="/signup" className="text-primary font-medium hover:underline">
+                  Sign up
+                </Link>
+              </p>
+            </div>
             <div className="text-sm text-muted-foreground text-center mt-4">
               <p>For demo purposes, use these credentials:</p>
               <p className="font-medium mt-2">Admin: admin@promopulse.com</p>

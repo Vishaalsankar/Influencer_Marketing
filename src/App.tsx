@@ -8,8 +8,10 @@ import { AuthProvider } from "@/contexts/AuthContext";
 
 // Pages
 import Login from "./pages/Login";
+import Signup from "./pages/Signup";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import Chat from "./pages/Chat";
 
 // Admin Portal Pages
 import AdminPortal from "./pages/AdminPortal";
@@ -40,7 +42,8 @@ const App = () => (
           <Routes>
             {/* Public Routes */}
             <Route path="/login" element={<Login />} />
-            <Route path="/" element={<Navigate to="/login" />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/" element={<Index />} />
 
             {/* Admin Portal Routes */}
             <Route path="/admin" element={<AdminPortal />} />
@@ -53,11 +56,13 @@ const App = () => (
             <Route path="/brand/influencer-search" element={<BrandInfluencerSearch />} />
             <Route path="/brand/analytics" element={<BrandAnalytics />} />
             <Route path="/brand/create-campaign" element={<BrandCreateCampaign />} />
+            <Route path="/brand/chat" element={<Chat />} />
 
             {/* Influencer Portal Routes */}
             <Route path="/influencer" element={<InfluencerPortal />} />
             <Route path="/influencer/campaigns" element={<InfluencerCampaigns />} />
             <Route path="/influencer/earnings" element={<InfluencerEarnings />} />
+            <Route path="/influencer/chat" element={<Chat />} />
 
             {/* Catch-all for 404 */}
             <Route path="*" element={<NotFound />} />

@@ -1,7 +1,8 @@
-
 export type UserRole = 'admin' | 'influencer' | 'brand';
 
 export type InfluencerCategory = 'nano' | 'micro' | 'macro' | 'celebrity';
+
+export type InfluencerNiche = 'fitness' | 'food' | 'cosmetics' | 'tech' | 'travel' | 'vlog' | 'fashion' | 'beauty' | 'lifestyle' | 'gaming' | 'education';
 
 export type CampaignStatus = 'draft' | 'active' | 'completed';
 
@@ -13,6 +14,7 @@ export type User = {
   role: UserRole;
   name: string;
   created_at: string;
+  profile_image?: string;
 };
 
 export type Influencer = {
@@ -20,12 +22,15 @@ export type Influencer = {
   user_id: string;
   name: string;
   category: InfluencerCategory;
+  niches: InfluencerNiche[];
   followers: number;
   engagement_rate: number;
   fee_inr: number;
   platform: string;
   audience_interests: string[];
   status: 'active' | 'banned';
+  profile_image?: string;
+  bio?: string;
 };
 
 export type Product = {
@@ -82,4 +87,14 @@ export type TestScenario = {
     conversion_percent: number;
     roi_percent: number;
   };
+};
+
+export type Message = {
+  message_id: string;
+  sender_id: string;
+  receiver_id: string;
+  content: string;
+  timestamp: string;
+  is_read: boolean;
+  sender_role: UserRole;
 };
