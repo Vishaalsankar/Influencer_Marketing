@@ -160,9 +160,9 @@ const Chat: React.FC = () => {
           table: 'messages',
           filter: `or(and(sender_id=eq.${user.user_id},receiver_id=eq.${selectedContact.user_id}),and(sender_id=eq.${selectedContact.user_id},receiver_id=eq.${user.user_id}))` 
         }, (payload) => {
-          // @ts-ignore - payload.new exists on the Supabase realtime payload
-          const newMessage = payload.new;
-          setMessages(prev => [...prev, newMessage]);
+          // Add the new message to the existing messages
+          const newMsg = payload.new as Message;
+          setMessages(prev => [...prev, newMsg]);
         })
         .subscribe();
       
