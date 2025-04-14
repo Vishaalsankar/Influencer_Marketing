@@ -7,7 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { mockInfluencers } from "@/services/mockData";
-import { Send } from "lucide-react";
+import { Send, MessageCircle } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 // Mock messages for demo
 const mockUsers = [
@@ -63,11 +65,41 @@ const mockMessages = [
 
 const Chat: React.FC = () => {
   const { user } = useAuth();
+  const [searchParams] = useSearchParams();
+  const { toast } = useToast();
   const [contacts, setContacts] = useState<any[]>([]);
   const [selectedContact, setSelectedContact] = useState<any | null>(null);
   const [messages, setMessages] = useState<any[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Get contact info from URL params if available
+  useEffect(() => {
+    const contactId = searchParams.get("contact");
+    const contactName = searchParams.get("name");
+    
+    if (contactId && contactName) {
+      const preselectedContact = {
+        user_id: contactId,
+        name: decodeURIComponent(contactName),
+        role: "influencer",
+        profile_image: mockInfluencers.find(inf => inf.user_id === contactId)?.profile_image || "/placeholder.svg",
+      };
+      
+      // Set as selected contact if not already in contacts
+      if (!contacts.some(c => c.user_id === contactId)) {
+        setContacts(prev => [...prev, preselectedContact]);
+      }
+      
+      setSelectedContact(preselectedContact);
+      
+      // Show toast to indicate starting a new conversation
+      toast({
+        title: "Starting conversation",
+        description: `You can now chat with ${decodeURIComponent(contactName)}`,
+      });
+    }
+  }, [searchParams, contacts, toast]);
 
   // Initialize contacts based on user role
   useEffect(() => {
@@ -241,7 +273,10 @@ const Chat: React.FC = () => {
               </>
             ) : (
               <CardContent className="flex items-center justify-center h-full">
-                <p className="text-muted-foreground">Select a contact to start messaging</p>
+                <div className="text-center">
+                  <MessageCircle className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                  <p className="text-muted-foreground">Select a contact to start messaging</p>
+                </div>
               </CardContent>
             )}
           </Card>
