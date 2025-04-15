@@ -1,14 +1,13 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import MainLayout from "@/components/layout/MainLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
-import { Send, MessageCircle } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import ContactsList from "@/components/chat/ContactsList";
+import MessageList from "@/components/chat/MessageList";
+import MessageInput from "@/components/chat/MessageInput";
 
 type Message = {
   id: string;
@@ -34,7 +33,6 @@ const Chat: React.FC = () => {
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
-  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Get contact info from URL params if available
   useEffect(() => {
@@ -118,7 +116,10 @@ const Chat: React.FC = () => {
         }
         
         if (data) {
-          setMessages(data);
+          setMessages(data.map(msg => ({
+            ...msg,
+            id: msg.id.toString()
+          })));
         }
       };
       
@@ -145,11 +146,6 @@ const Chat: React.FC = () => {
     }
   }, [selectedContact, user, toast]);
 
-  // Scroll to bottom of messages
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
-
   const handleSendMessage = async () => {
     if (newMessage.trim() && selectedContact && user) {
       try {
@@ -164,7 +160,6 @@ const Chat: React.FC = () => {
         
         if (error) throw error;
         
-        // Clear message input after sending
         setNewMessage("");
       } catch (error) {
         console.error("Error sending message:", error);
@@ -195,117 +190,25 @@ const Chat: React.FC = () => {
         </div>
         
         <div className="grid md:grid-cols-3 gap-6 h-[calc(80vh-120px)]">
-          <Card className="md:col-span-1 overflow-hidden flex flex-col">
-            <CardHeader>
-              <CardTitle>Contacts</CardTitle>
-            </CardHeader>
-            <CardContent className="p-0 overflow-y-auto flex-grow">
-              {contacts.length === 0 ? (
-                <div className="flex items-center justify-center h-32 text-muted-foreground">
-                  No contacts yet
-                </div>
-              ) : (
-                <div className="divide-y">
-                  {contacts.map((contact) => (
-                    <div
-                      key={contact.user_id}
-                      onClick={() => setSelectedContact(contact)}
-                      className={`flex items-center gap-3 p-4 hover:bg-muted cursor-pointer transition-colors ${
-                        selectedContact?.user_id === contact.user_id ? "bg-muted" : ""
-                      }`}
-                    >
-                      <Avatar>
-                        <AvatarImage src={contact.profile_image || undefined} alt={contact.name} />
-                        <AvatarFallback>{contact.name.substring(0, 2).toUpperCase()}</AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <p className="font-medium">{contact.name}</p>
-                        <p className="text-sm text-muted-foreground capitalize">{contact.role}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          <ContactsList
+            contacts={contacts}
+            selectedContact={selectedContact}
+            onSelectContact={setSelectedContact}
+          />
           
           <Card className="md:col-span-2 overflow-hidden flex flex-col">
-            <CardHeader className="border-b">
-              {selectedContact ? (
-                <div className="flex items-center gap-3">
-                  <Avatar>
-                    <AvatarImage src={selectedContact.profile_image || undefined} alt={selectedContact.name} />
-                    <AvatarFallback>
-                      {selectedContact.name.substring(0, 2).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <CardTitle>{selectedContact.name}</CardTitle>
-                    <p className="text-sm text-muted-foreground capitalize">{selectedContact.role}</p>
-                  </div>
-                </div>
-              ) : (
-                <CardTitle>Select a contact</CardTitle>
-              )}
-            </CardHeader>
-            
-            {selectedContact ? (
-              <>
-                <CardContent className="flex-grow overflow-y-auto p-4 space-y-4">
-                  {messages.length === 0 ? (
-                    <div className="flex items-center justify-center h-full">
-                      <p className="text-muted-foreground">No messages yet. Start a conversation!</p>
-                    </div>
-                  ) : (
-                    messages.map((msg) => (
-                      <div
-                        key={msg.id}
-                        className={`flex ${
-                          msg.sender_id === user?.user_id ? "justify-end" : "justify-start"
-                        }`}
-                      >
-                        <div
-                          className={`max-w-[80%] rounded-lg p-3 ${
-                            msg.sender_id === user?.user_id
-                              ? "bg-primary text-primary-foreground"
-                              : "bg-muted"
-                          }`}
-                        >
-                          <p>{msg.content}</p>
-                          <p className="text-xs opacity-70 mt-1">
-                            {new Date(msg.created_at).toLocaleTimeString([], {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
-                          </p>
-                        </div>
-                      </div>
-                    ))
-                  )}
-                  <div ref={messagesEndRef} />
-                </CardContent>
-                
-                <div className="p-4 border-t">
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder="Type a message..."
-                      value={newMessage}
-                      onChange={(e) => setNewMessage(e.target.value)}
-                      onKeyPress={handleKeyPress}
-                    />
-                    <Button onClick={handleSendMessage} disabled={!newMessage.trim()}>
-                      <Send className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </>
-            ) : (
-              <CardContent className="flex items-center justify-center h-full">
-                <div className="text-center">
-                  <MessageCircle className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                  <p className="text-muted-foreground">Select a contact to start messaging</p>
-                </div>
-              </CardContent>
+            <MessageList
+              messages={messages}
+              selectedContact={selectedContact}
+              currentUserId={user?.user_id}
+            />
+            {selectedContact && (
+              <MessageInput
+                newMessage={newMessage}
+                onMessageChange={setNewMessage}
+                onSendMessage={handleSendMessage}
+                onKeyPress={handleKeyPress}
+              />
             )}
           </Card>
         </div>
