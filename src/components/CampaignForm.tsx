@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -22,6 +21,7 @@ import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/use-toast";
 import InfluencerRecommendation from "./InfluencerRecommendation";
 import { Influencer } from "@/types";
+import { supabase } from "@/lib/supabase";
 
 interface CampaignFormProps {
   onSubmit?: (campaign: any) => void;
@@ -51,16 +51,14 @@ const CampaignForm: React.FC<CampaignFormProps> = ({ onSubmit }) => {
   const { toast } = useToast();
 
   const handleBudgetChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Allow only numbers
     const value = e.target.value.replace(/[^0-9]/g, "");
     setBudget(value);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (step === 1) {
-      // Validate first step
       if (!name || !budget || !category || !startDate || !endDate || !goals) {
         toast({
           title: "Missing fields",
@@ -83,7 +81,6 @@ const CampaignForm: React.FC<CampaignFormProps> = ({ onSubmit }) => {
       return;
     }
     
-    // Validate second step
     if (selectedInfluencers.length === 0) {
       toast({
         title: "No influencers selected",
@@ -95,48 +92,52 @@ const CampaignForm: React.FC<CampaignFormProps> = ({ onSubmit }) => {
     
     setIsSubmitting(true);
     
-    // Calculate total influencer fees
-    const totalFees = selectedInfluencers.reduce(
-      (sum, influencer) => sum + influencer.fee_inr,
-      0
-    );
-    
-    if (totalFees > Number(budget)) {
+    try {
+      const { data: campaign, error: campaignError } = await supabase
+        .from('campaigns')
+        .insert({
+          name,
+          budget_inr: Number(budget),
+          category,
+          goals,
+          start_date: startDate?.toISOString().split("T")[0],
+          end_date: endDate?.toISOString().split("T")[0],
+          status: "draft"
+        })
+        .select()
+        .single();
+
+      if (campaignError) throw campaignError;
+
+      if (campaign) {
+        const influencerLinks = selectedInfluencers.map((influencer) => ({
+          campaign_id: campaign.campaign_id,
+          influencer_id: influencer.influencer_id
+        }));
+
+        const { error: influencerError } = await supabase
+          .from('campaign_influencers')
+          .insert(influencerLinks);
+
+        if (influencerError) throw influencerError;
+      }
+
       toast({
-        title: "Budget exceeded",
-        description: `The total influencer fees (₹${totalFees.toLocaleString('en-IN')}) exceed your campaign budget (₹${Number(budget).toLocaleString('en-IN')}).`,
+        title: "Success",
+        description: "Campaign created successfully",
+      });
+
+      navigate("/brand");
+    } catch (error) {
+      console.error("Error creating campaign:", error);
+      toast({
+        title: "Error",
+        description: "Failed to create campaign",
         variant: "destructive",
       });
+    } finally {
       setIsSubmitting(false);
-      return;
     }
-    
-    // Create campaign object
-    const campaign = {
-      name,
-      budget_inr: Number(budget),
-      category,
-      goals,
-      start_date: startDate?.toISOString().split("T")[0],
-      end_date: endDate?.toISOString().split("T")[0],
-      status: "draft",
-      influencers: selectedInfluencers,
-    };
-    
-    // Submit the campaign
-    setTimeout(() => {
-      if (onSubmit) {
-        onSubmit(campaign);
-      }
-      
-      toast({
-        title: "Campaign created successfully",
-        description: "Your campaign has been created and is ready for review.",
-      });
-      
-      navigate("/brand");
-      setIsSubmitting(false);
-    }, 1000);
   };
   
   const handleInfluencerSelect = (influencers: Influencer[]) => {
