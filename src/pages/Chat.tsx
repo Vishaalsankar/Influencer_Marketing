@@ -77,45 +77,49 @@ const Chat: React.FC = () => {
     if (user) {
       const fetchContacts = async () => {
         try {
-          // This query finds all unique users with whom the current user has exchanged messages
+          // Instead of trying to use complex joins, we'll simplify this query
+          // and use separate queries to get user profile data
           const { data, error } = await supabase
             .from('messages')
-            .select(`
-              sender_id, receiver_id,
-              sender:profiles!sender_id(name, role, profile_image),
-              receiver:profiles!receiver_id(name, role, profile_image)
-            `)
+            .select('sender_id, receiver_id')
             .or(`sender_id.eq.${user.user_id},receiver_id.eq.${user.user_id}`);
           
           if (error) throw error;
           
           if (data) {
-            // Extract unique contacts from messages
-            const uniqueContacts = new Map<string, Contact>();
+            // Extract unique contact IDs from messages
+            const uniqueContactIds = new Set<string>();
             
             data.forEach(msg => {
-              // If the sender is not the current user, add them as a contact
-              if (msg.sender_id !== user.user_id && msg.sender) {
-                uniqueContacts.set(msg.sender_id, {
-                  user_id: msg.sender_id,
-                  name: msg.sender.name, // Use dot notation for accessing properties
-                  role: msg.sender.role,
-                  profile_image: msg.sender.profile_image
-                });
+              if (msg.sender_id !== user.user_id) {
+                uniqueContactIds.add(msg.sender_id);
               }
-              
-              // If the receiver is not the current user, add them as a contact
-              if (msg.receiver_id !== user.user_id && msg.receiver) {
-                uniqueContacts.set(msg.receiver_id, {
-                  user_id: msg.receiver_id,
-                  name: msg.receiver.name, // Use dot notation for accessing properties
-                  role: msg.receiver.role,
-                  profile_image: msg.receiver.profile_image
-                });
+              if (msg.receiver_id !== user.user_id) {
+                uniqueContactIds.add(msg.receiver_id);
               }
             });
             
-            setContacts(Array.from(uniqueContacts.values()));
+            // Now fetch profiles for these contacts
+            const contactsData: Contact[] = [];
+            
+            for (const contactId of uniqueContactIds) {
+              const { data: profileData } = await supabase
+                .from('profiles')
+                .select('user_id, name, role, profile_image')
+                .eq('user_id', contactId)
+                .single();
+                
+              if (profileData) {
+                contactsData.push({
+                  user_id: profileData.user_id,
+                  name: profileData.name,
+                  role: profileData.role,
+                  profile_image: profileData.profile_image
+                });
+              }
+            }
+            
+            setContacts(contactsData);
           }
         } catch (error) {
           console.error("Error fetching contacts:", error);
