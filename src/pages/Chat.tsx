@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import MainLayout from "@/components/layout/MainLayout";
 import { Card } from "@/components/ui/card";
@@ -8,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import ContactsList from "@/components/chat/ContactsList";
 import MessageList from "@/components/chat/MessageList";
 import MessageInput from "@/components/chat/MessageInput";
+import { createMockMessages } from "@/lib/supabase";
 
 type Message = {
   id: string;
@@ -33,6 +35,16 @@ const Chat: React.FC = () => {
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Initialize mock data
+  useEffect(() => {
+    const initMockData = async () => {
+      await createMockMessages();
+    };
+    
+    initMockData();
+  }, []);
 
   // Get contact info from URL params if available
   useEffect(() => {
@@ -62,16 +74,25 @@ const Chat: React.FC = () => {
     if (user) {
       const fetchContacts = async () => {
         try {
+          setIsLoading(true);
           // Get profiles based on role
           const targetRole = user.role === "brand" ? "influencer" : "brand";
+          
+          // Debug: Log current user role and target role
+          console.log(`Current user role: ${user.role}, fetching contacts with role: ${targetRole}`);
+          
           const { data: profilesData, error: profilesError } = await supabase
             .from('profiles')
             .select('*')
             .eq('role', targetRole);
           
-          if (profilesError) throw profilesError;
+          if (profilesError) {
+            console.error("Profiles query error:", profilesError);
+            throw profilesError;
+          }
           
           if (profilesData) {
+            console.log("Profiles data:", profilesData);
             const contactsData = profilesData.map(profile => ({
               user_id: profile.user_id,
               name: profile.name,
@@ -88,6 +109,8 @@ const Chat: React.FC = () => {
             description: "Failed to load contacts",
             variant: "destructive",
           });
+        } finally {
+          setIsLoading(false);
         }
       };
       
@@ -99,6 +122,11 @@ const Chat: React.FC = () => {
   useEffect(() => {
     if (selectedContact && user) {
       const fetchMessages = async () => {
+        setIsLoading(true);
+        
+        // Debug: Log the query parameters
+        console.log(`Fetching messages between ${user.user_id} and ${selectedContact.user_id}`);
+        
         const { data, error } = await supabase
           .from('messages')
           .select('*')
@@ -112,15 +140,19 @@ const Chat: React.FC = () => {
             description: "Failed to load messages",
             variant: "destructive",
           });
+          setIsLoading(false);
           return;
         }
         
         if (data) {
+          console.log("Messages data:", data);
           setMessages(data.map(msg => ({
             ...msg,
             id: msg.id.toString()
           })));
         }
+        
+        setIsLoading(false);
       };
       
       fetchMessages();
@@ -134,6 +166,7 @@ const Chat: React.FC = () => {
           table: 'messages',
           filter: `or(and(sender_id=eq.${user.user_id},receiver_id=eq.${selectedContact.user_id}),and(sender_id=eq.${selectedContact.user_id},receiver_id=eq.${user.user_id}))` 
         }, (payload) => {
+          console.log("Received new message:", payload);
           // Add the new message to the existing messages
           const newMsg = payload.new as Message;
           setMessages(prev => [...prev, newMsg]);
@@ -149,6 +182,9 @@ const Chat: React.FC = () => {
   const handleSendMessage = async () => {
     if (newMessage.trim() && selectedContact && user) {
       try {
+        // Debug: Log the message being sent
+        console.log(`Sending message from ${user.user_id} to ${selectedContact.user_id}: ${newMessage}`);
+        
         const { error } = await supabase
           .from('messages')
           .insert({
@@ -158,7 +194,10 @@ const Chat: React.FC = () => {
             sender_role: user.role
           });
         
-        if (error) throw error;
+        if (error) {
+          console.error("Error sending message:", error);
+          throw error;
+        }
         
         setNewMessage("");
       } catch (error) {

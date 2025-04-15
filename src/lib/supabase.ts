@@ -10,9 +10,9 @@ export const createMockMessages = async () => {
   try {
     // Sample users from our auth context
     const users = [
-      { user_id: "1", name: "Admin User", role: "admin" },
-      { user_id: "2", name: "Brand User", role: "brand" },
-      { user_id: "3", name: "Influencer User", role: "influencer" }
+      { user_id: "1", name: "Admin User", role: "admin", profile_image: "/placeholder.svg" },
+      { user_id: "2", name: "Brand User", role: "brand", profile_image: "/placeholder.svg" },
+      { user_id: "3", name: "Influencer User", role: "influencer", profile_image: "https://source.unsplash.com/random/200x200/?person" }
     ];
     
     // Add profiles if they don't exist
@@ -30,8 +30,14 @@ export const createMockMessages = async () => {
             user_id: user.user_id,
             name: user.name,
             role: user.role,
-            profile_image: user.user_id === "3" ? "https://source.unsplash.com/random/200x200/?person" : "/placeholder.svg"
+            profile_image: user.profile_image
           });
+      } else {
+        // Update existing profile to ensure it has profile_image
+        await supabase
+          .from('profiles')
+          .update({ profile_image: user.profile_image })
+          .eq('user_id', user.user_id);
       }
     }
 

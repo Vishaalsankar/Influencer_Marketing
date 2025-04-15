@@ -53,10 +53,13 @@ const MessageList: React.FC<MessageListProps> = ({
       <CardHeader className="border-b">
         <div className="flex items-center gap-3">
           <Avatar>
-            <AvatarImage src={selectedContact.profile_image || undefined} alt={selectedContact.name} />
-            <AvatarFallback>
-              {selectedContact.name.substring(0, 2).toUpperCase()}
-            </AvatarFallback>
+            {selectedContact.profile_image ? (
+              <AvatarImage src={selectedContact.profile_image} alt={selectedContact.name} />
+            ) : (
+              <AvatarFallback>
+                {selectedContact.name.substring(0, 2).toUpperCase()}
+              </AvatarFallback>
+            )}
           </Avatar>
           <div>
             <CardTitle>{selectedContact.name}</CardTitle>
@@ -102,4 +105,3 @@ const MessageList: React.FC<MessageListProps> = ({
 };
 
 export default MessageList;
-

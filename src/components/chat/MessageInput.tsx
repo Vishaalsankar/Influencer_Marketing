@@ -17,6 +17,15 @@ const MessageInput: React.FC<MessageInputProps> = ({
   onSendMessage,
   onKeyPress,
 }) => {
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      if (newMessage.trim()) {
+        onSendMessage();
+      }
+    }
+  };
+
   return (
     <div className="p-4 border-t">
       <div className="flex gap-2">
@@ -24,7 +33,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
           placeholder="Type a message..."
           value={newMessage}
           onChange={(e) => onMessageChange(e.target.value)}
-          onKeyPress={onKeyPress}
+          onKeyDown={handleKeyDown}
         />
         <Button onClick={onSendMessage} disabled={!newMessage.trim()}>
           <Send className="h-4 w-4" />
@@ -35,4 +44,3 @@ const MessageInput: React.FC<MessageInputProps> = ({
 };
 
 export default MessageInput;
-

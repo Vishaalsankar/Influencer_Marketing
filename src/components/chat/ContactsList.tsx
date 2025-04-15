@@ -22,7 +22,7 @@ const ContactsList: React.FC<ContactsListProps> = ({
   onSelectContact,
 }) => {
   return (
-    <Card className="md:col-span-1 overflow-hidden flex flex-col">
+    <Card className="md:col-span-1 overflow-hidden flex flex-col h-full">
       <CardHeader>
         <CardTitle>Contacts</CardTitle>
       </CardHeader>
@@ -42,8 +42,11 @@ const ContactsList: React.FC<ContactsListProps> = ({
                 }`}
               >
                 <Avatar>
-                  <AvatarImage src={contact.profile_image || undefined} alt={contact.name} />
-                  <AvatarFallback>{contact.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                  {contact.profile_image ? (
+                    <AvatarImage src={contact.profile_image} alt={contact.name} />
+                  ) : (
+                    <AvatarFallback>{contact.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                  )}
                 </Avatar>
                 <div>
                   <p className="font-medium">{contact.name}</p>
@@ -59,4 +62,3 @@ const ContactsList: React.FC<ContactsListProps> = ({
 };
 
 export default ContactsList;
-

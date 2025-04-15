@@ -1,4 +1,3 @@
-
 import { 
   User, 
   Influencer, 
@@ -883,7 +882,14 @@ export const filterInfluencers = (
 
 // Helper function to get campaigns for a specific brand
 export const getBrandCampaigns = (brandId: string): Campaign[] => {
-  return mockCampaigns.filter((campaign) => campaign.brand_id === brandId);
+  console.log(`Getting campaigns for brand ID: ${brandId}`);
+  // If no brand ID provided or empty string, return an empty array
+  if (!brandId) return [];
+  
+  // Get campaigns for the specified brand
+  const campaigns = mockCampaigns.filter((campaign) => campaign.brand_id === brandId);
+  console.log(`Found ${campaigns.length} campaigns for brand ID ${brandId}`);
+  return campaigns;
 };
 
 // Helper function to get influencers for a specific campaign
