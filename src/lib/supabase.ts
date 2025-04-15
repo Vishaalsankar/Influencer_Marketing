@@ -1,43 +1,13 @@
 
 import { createClient } from '@supabase/supabase-js';
 
-// Get Supabase credentials from environment variables
 const supabaseUrl = 'https://ysiuxthjpmslgrxyibii.supabase.co';
 const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlzaXV4dGhqcG1zbGdyeHlpYmlpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ2MTEzMTAsImV4cCI6MjA2MDE4NzMxMH0.WwBKEqsolXhGmkTCf5zWzEAr8rWz5oSpPeqr9MxzQvU';
 
-// Initialize the Supabase client
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-// Create mock data functions
 export const createMockMessages = async () => {
   try {
-    // First create messages table if it doesn't exist
-    const { error: tableError } = await supabase.rpc('create_messages_table_if_not_exists', {});
-    if (tableError) {
-      console.error('Error creating messages table:', tableError);
-    }
-
-    // Check if profiles table exists and create it if needed
-    const { error: profilesTableError } = await supabase.rpc('create_profiles_table_if_not_exists', {});
-    if (profilesTableError) {
-      console.error('Error creating profiles table:', profilesTableError);
-    }
-
-    // Check if messages table already has data
-    const { count, error: countError } = await supabase
-      .from('messages')
-      .select('*', { count: 'exact', head: true });
-    
-    if (countError) {
-      console.error('Error checking messages count:', countError);
-      return;
-    }
-    
-    if (count && count > 0) {
-      console.log('Messages already exist, skipping mock data creation');
-      return;
-    }
-    
     // Sample users from our auth context
     const users = [
       { user_id: "1", name: "Admin User", role: "admin" },
@@ -45,22 +15,36 @@ export const createMockMessages = async () => {
       { user_id: "3", name: "Influencer User", role: "influencer" }
     ];
     
-    // Insert or update user profiles
+    // Add profiles if they don't exist
     for (const user of users) {
-      const { error: profileError } = await supabase
+      const { data: existingProfile } = await supabase
         .from('profiles')
-        .upsert({
-          user_id: user.user_id,
-          name: user.name,
-          role: user.role,
-          profile_image: user.user_id === "3" ? "https://source.unsplash.com/random/200x200/?person" : "/placeholder.svg"
-        });
+        .select()
+        .eq('user_id', user.user_id)
+        .single();
       
-      if (profileError) {
-        console.error('Error creating mock profile:', profileError);
+      if (!existingProfile) {
+        await supabase
+          .from('profiles')
+          .insert({
+            user_id: user.user_id,
+            name: user.name,
+            role: user.role,
+            profile_image: user.user_id === "3" ? "https://source.unsplash.com/random/200x200/?person" : "/placeholder.svg"
+          });
       }
     }
+
+    // Check if messages exist
+    const { count } = await supabase
+      .from('messages')
+      .select('*', { count: 'exact', head: true });
     
+    if (count && count > 0) {
+      console.log('Messages already exist, skipping mock data creation');
+      return;
+    }
+
     // Create sample messages
     const mockMessages = [
       {
@@ -80,31 +64,12 @@ export const createMockMessages = async () => {
         receiver_id: "3", // Influencer
         content: "Great! We're launching a new product line and looking for influencers to promote it.",
         sender_role: "brand"
-      },
-      {
-        sender_id: "3", // Influencer
-        receiver_id: "2", // Brand
-        content: "That sounds exciting! What kind of content are you looking for?",
-        sender_role: "influencer"
-      },
-      {
-        sender_id: "2", // Brand
-        receiver_id: "3", // Influencer
-        content: "We're thinking about unboxing videos and lifestyle content showing the product in use.",
-        sender_role: "brand"
       }
     ];
     
-    // Add messages to the database
-    const { error } = await supabase.from('messages').insert(mockMessages);
-    
-    if (error) {
-      console.error('Error creating mock messages:', error);
-      return;
-    }
-    
+    await supabase.from('messages').insert(mockMessages);
     console.log('Mock data created successfully');
-  } catch (e) {
-    console.error('Error in createMockMessages:', e);
+  } catch (error) {
+    console.error('Error in createMockMessages:', error);
   }
 };

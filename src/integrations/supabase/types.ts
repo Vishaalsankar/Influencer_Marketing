@@ -11,22 +11,49 @@ export type Database = {
     Tables: {
       messages: {
         Row: {
+          content: string
           created_at: string
           id: number
-          receiver_id: string | null
-          sender_role: string | null
+          receiver_id: string
+          sender_id: string
+          sender_role: string
         }
         Insert: {
+          content: string
           created_at?: string
           id?: number
-          receiver_id?: string | null
-          sender_role?: string | null
+          receiver_id: string
+          sender_id: string
+          sender_role: string
         }
         Update: {
+          content?: string
           created_at?: string
           id?: number
-          receiver_id?: string | null
-          sender_role?: string | null
+          receiver_id?: string
+          sender_id?: string
+          sender_role?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          name: string
+          profile_image: string | null
+          role: string
+          user_id: string
+        }
+        Insert: {
+          name: string
+          profile_image?: string | null
+          role: string
+          user_id: string
+        }
+        Update: {
+          name?: string
+          profile_image?: string | null
+          role?: string
+          user_id?: string
         }
         Relationships: []
       }

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import MainLayout from "@/components/layout/MainLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,7 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Send, MessageCircle } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { supabase, createMockMessages } from "@/lib/supabase";
+import { supabase } from "@/integrations/supabase/client";
 
 type Message = {
   id: string;
@@ -37,13 +36,6 @@ const Chat: React.FC = () => {
   const [newMessage, setNewMessage] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Initialize mock data on component mount
-  useEffect(() => {
-    if (user) {
-      createMockMessages().catch(console.error);
-    }
-  }, [user]);
-
   // Get contact info from URL params if available
   useEffect(() => {
     const contactId = searchParams.get("contact");
@@ -57,11 +49,6 @@ const Chat: React.FC = () => {
         profile_image: null
       };
       
-      // Set as selected contact if not already in contacts
-      if (!contacts.some(c => c.user_id === contactId)) {
-        setContacts(prev => [...prev, preselectedContact]);
-      }
-      
       setSelectedContact(preselectedContact);
       
       // Show toast to indicate starting a new conversation
@@ -70,54 +57,29 @@ const Chat: React.FC = () => {
         description: `You can now chat with ${decodeURIComponent(contactName)}`,
       });
     }
-  }, [searchParams, contacts, toast, user?.role]);
+  }, [searchParams, user?.role, toast]);
 
   // Initialize contacts based on user role
   useEffect(() => {
     if (user) {
       const fetchContacts = async () => {
         try {
-          // Instead of trying to use complex joins, we'll simplify this query
-          // and use separate queries to get user profile data
-          const { data, error } = await supabase
-            .from('messages')
-            .select('sender_id, receiver_id')
-            .or(`sender_id.eq.${user.user_id},receiver_id.eq.${user.user_id}`);
+          // Get profiles based on role
+          const targetRole = user.role === "brand" ? "influencer" : "brand";
+          const { data: profilesData, error: profilesError } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('role', targetRole);
           
-          if (error) throw error;
+          if (profilesError) throw profilesError;
           
-          if (data) {
-            // Extract unique contact IDs from messages
-            const uniqueContactIds = new Set<string>();
-            
-            data.forEach(msg => {
-              if (msg.sender_id !== user.user_id) {
-                uniqueContactIds.add(msg.sender_id);
-              }
-              if (msg.receiver_id !== user.user_id) {
-                uniqueContactIds.add(msg.receiver_id);
-              }
-            });
-            
-            // Now fetch profiles for these contacts
-            const contactsData: Contact[] = [];
-            
-            for (const contactId of uniqueContactIds) {
-              const { data: profileData } = await supabase
-                .from('profiles')
-                .select('user_id, name, role, profile_image')
-                .eq('user_id', contactId)
-                .single();
-                
-              if (profileData) {
-                contactsData.push({
-                  user_id: profileData.user_id,
-                  name: profileData.name,
-                  role: profileData.role,
-                  profile_image: profileData.profile_image
-                });
-              }
-            }
+          if (profilesData) {
+            const contactsData = profilesData.map(profile => ({
+              user_id: profile.user_id,
+              name: profile.name,
+              role: profile.role,
+              profile_image: profile.profile_image
+            }));
             
             setContacts(contactsData);
           }
@@ -163,7 +125,7 @@ const Chat: React.FC = () => {
       fetchMessages();
       
       // Subscribe to new messages
-      const messagesSubscription = supabase
+      const channel = supabase
         .channel('messages')
         .on('postgres_changes', { 
           event: 'INSERT', 
@@ -178,7 +140,7 @@ const Chat: React.FC = () => {
         .subscribe();
       
       return () => {
-        supabase.removeChannel(messagesSubscription);
+        supabase.removeChannel(channel);
       };
     }
   }, [selectedContact, user, toast]);
@@ -216,7 +178,8 @@ const Chat: React.FC = () => {
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
       handleSendMessage();
     }
   };
