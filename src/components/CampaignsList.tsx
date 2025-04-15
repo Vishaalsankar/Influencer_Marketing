@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -11,8 +12,6 @@ import { Campaign, CampaignStatus } from "@/types";
 
 interface CampaignsListProps {
   campaigns: Campaign[];
-  isLoading?: boolean;
-  onStatusChange?: (campaignId: string, status: string) => void;
   title?: string;
   description?: string;
 }
@@ -43,8 +42,6 @@ const getStatusBadge = (status: CampaignStatus) => {
 
 const CampaignsList: React.FC<CampaignsListProps> = ({
   campaigns,
-  isLoading = false,
-  onStatusChange,
   title = "Your Campaigns",
   description = "View and manage your marketing campaigns",
 }) => {
@@ -71,53 +68,46 @@ const CampaignsList: React.FC<CampaignsListProps> = ({
       <CardContent>
         <Table>
           <TableCaption>
-            {isLoading ? (
-              <TableRow>
-                <TableCell colSpan={6} className="text-center">
-                  <div className="flex items-center justify-center space-x-2">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
-                    <span>Loading campaigns...</span>
-                  </div>
+            {campaigns.length === 0
+              ? "No campaigns found"
+              : `List of ${campaigns.length} campaigns`}
+          </TableCaption>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Name</TableHead>
+              <TableHead>Category</TableHead>
+              <TableHead>Budget (INR)</TableHead>
+              <TableHead>Timeline</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {campaigns.map((campaign) => (
+              <TableRow key={campaign.campaign_id}>
+                <TableCell className="font-medium">{campaign.name}</TableCell>
+                <TableCell className="capitalize">{campaign.category}</TableCell>
+                <TableCell className="inr">{formatINR(campaign.budget_inr)}</TableCell>
+                <TableCell>
+                  {new Date(campaign.start_date).toLocaleDateString()} - {new Date(campaign.end_date).toLocaleDateString()}
+                </TableCell>
+                <TableCell>{getStatusBadge(campaign.status)}</TableCell>
+                <TableCell className="text-right">
+                  <Button variant="ghost" size="sm" asChild>
+                    <Link
+                      to={
+                        isAdmin
+                          ? `/admin/campaigns/${campaign.campaign_id}`
+                          : `/brand/campaigns/${campaign.campaign_id}`
+                      }
+                    >
+                      <span className="sr-only">View details</span>
+                      <ChevronRight className="h-4 w-4" />
+                    </Link>
+                  </Button>
                 </TableCell>
               </TableRow>
-            ) : campaigns.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={6} className="text-center text-muted-foreground">
-                  No campaigns found
-                </TableCell>
-              </TableRow>
-            ) : (
-              campaigns.map((campaign) => (
-                <TableRow key={campaign.campaign_id}>
-                  <TableCell className="font-medium">{campaign.name}</TableCell>
-                  <TableCell className="capitalize">{campaign.category}</TableCell>
-                  <TableCell className="inr">{formatINR(campaign.budget_inr)}</TableCell>
-                  <TableCell>
-                    {new Date(campaign.start_date).toLocaleDateString()} - {new Date(campaign.end_date).toLocaleDateString()}
-                  </TableCell>
-                  <TableCell>
-                    {onStatusChange ? (
-                      <CampaignStatus
-                        status={campaign.status}
-                        onStatusChange={(status) => onStatusChange(campaign.campaign_id, status)}
-                      />
-                    ) : (
-                      getStatusBadge(campaign.status as CampaignStatus)
-                    )}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button variant="ghost" size="sm" asChild>
-                      <Link
-                        to={isAdmin ? `/admin/campaigns/${campaign.campaign_id}` : `/brand/campaigns/${campaign.campaign_id}`}
-                      >
-                        <span className="sr-only">View details</span>
-                        <ChevronRight className="h-4 w-4" />
-                      </Link>
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
+            ))}
           </TableBody>
         </Table>
       </CardContent>

@@ -1,28 +1,30 @@
 
 import React from "react";
+import { Link } from "react-router-dom";
 import MainLayout from "@/components/layout/MainLayout";
+import CampaignsList from "@/components/CampaignsList";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowUp, DollarSign, Percent } from "lucide-react";
-import { Link } from "react-router-dom";
+import { ArrowUp, ArrowDown, DollarSign, Percent } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { getBrandCampaigns, getCampaignPerformance } from "@/services/mockData";
 import { formatINR, formatPercent } from "@/lib/formatters";
-import { useCampaigns } from "@/hooks/useCampaigns";
-import CampaignsList from "@/components/CampaignsList";
 
 const BrandPortal: React.FC = () => {
   const { user } = useAuth();
-  const { campaigns, isLoading, updateCampaignStatus } = useCampaigns();
+  const campaigns = getBrandCampaigns(user?.user_id || "");
   
-  // Calculate summary metrics from real data
+  // Calculate summary metrics
   const activeCampaigns = campaigns.filter(c => c.status === "active").length;
-  const totalBudget = campaigns.reduce((sum, c) => sum + Number(c.budget_inr), 0);
-  const averageRoi = 15.2; // This would come from actual performance data in a real app
+  const totalBudget = campaigns.reduce((sum, c) => sum + c.budget_inr, 0);
   
-  const handleStatusChange = async (campaignId: string, newStatus: string) => {
-    await updateCampaignStatus.mutate({ campaignId, status: newStatus });
-  };
-
+  // Calculate average ROI
+  const campaignPerformances = campaigns.map(c => getCampaignPerformance(c.campaign_id));
+  const validPerformances = campaignPerformances.filter(p => p !== undefined);
+  const averageRoi = validPerformances.length > 0
+    ? validPerformances.reduce((sum, p) => sum + (p?.roi_percent || 0), 0) / validPerformances.length
+    : 0;
+  
   return (
     <MainLayout requiredRole="brand">
       <div className="space-y-6">
@@ -131,11 +133,7 @@ const BrandPortal: React.FC = () => {
           </Card>
         </div>
         
-        <CampaignsList
-          campaigns={campaigns}
-          isLoading={isLoading}
-          onStatusChange={handleStatusChange}
-        />
+        <CampaignsList campaigns={campaigns} />
       </div>
     </MainLayout>
   );
