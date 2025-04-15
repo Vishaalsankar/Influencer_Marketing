@@ -1,3 +1,4 @@
+
 import { 
   User, 
   Influencer, 
@@ -5,8 +6,7 @@ import {
   CampaignInfluencer, 
   PerformanceMetric, 
   FraudScore, 
-  Product,
-  InfluencerNiche 
+  Product 
 } from "@/types";
 
 // Mock Users
@@ -90,7 +90,6 @@ export const mockInfluencers: Influencer[] = [
     user_id: "3",
     name: "Priya Sharma",
     category: "nano",
-    niches: ["fashion", "beauty"],
     followers: 8000,
     engagement_rate: 5.2,
     fee_inr: 15000,
@@ -103,7 +102,6 @@ export const mockInfluencers: Influencer[] = [
     user_id: "6",
     name: "Amit Kumar",
     category: "micro",
-    niches: ["tech", "gadgets"],
     followers: 35000,
     engagement_rate: 4.1,
     fee_inr: 45000,
@@ -116,7 +114,6 @@ export const mockInfluencers: Influencer[] = [
     user_id: "7",
     name: "Neha Gupta",
     category: "micro",
-    niches: ["fashion", "travel"],
     followers: 52000,
     engagement_rate: 3.8,
     fee_inr: 65000,
@@ -129,7 +126,6 @@ export const mockInfluencers: Influencer[] = [
     user_id: "8",
     name: "Rahul Singh",
     category: "macro",
-    niches: ["fitness", "health"],
     followers: 180000,
     engagement_rate: 2.9,
     fee_inr: 120000,
@@ -142,7 +138,6 @@ export const mockInfluencers: Influencer[] = [
     user_id: "",
     name: "Ananya Patel",
     category: "nano",
-    niches: ["food", "travel"],
     followers: 9500,
     engagement_rate: 6.3,
     fee_inr: 18000,
@@ -155,7 +150,6 @@ export const mockInfluencers: Influencer[] = [
     user_id: "",
     name: "Vikram Malhotra",
     category: "macro",
-    niches: ["tech", "gaming"],
     followers: 220000,
     engagement_rate: 2.7,
     fee_inr: 150000,
@@ -168,7 +162,6 @@ export const mockInfluencers: Influencer[] = [
     user_id: "",
     name: "Shreya Kapoor",
     category: "micro",
-    niches: ["beauty", "wellness"],
     followers: 45000,
     engagement_rate: 4.5,
     fee_inr: 55000,
@@ -181,7 +174,6 @@ export const mockInfluencers: Influencer[] = [
     user_id: "",
     name: "Arjun Reddy",
     category: "macro",
-    niches: ["fitness", "sports"],
     followers: 320000,
     engagement_rate: 2.4,
     fee_inr: 180000,
@@ -194,7 +186,6 @@ export const mockInfluencers: Influencer[] = [
     user_id: "",
     name: "Kavita Desai",
     category: "nano",
-    niches: ["art", "design"],
     followers: 12000,
     engagement_rate: 5.8,
     fee_inr: 22000,
@@ -207,7 +198,6 @@ export const mockInfluencers: Influencer[] = [
     user_id: "",
     name: "Rohan Mehta",
     category: "micro",
-    niches: ["tech", "business"],
     followers: 75000,
     engagement_rate: 3.5,
     fee_inr: 80000,
@@ -220,7 +210,6 @@ export const mockInfluencers: Influencer[] = [
     user_id: "",
     name: "Divya Sharma",
     category: "nano",
-    niches: ["fashion", "lifestyle"],
     followers: 15000,
     engagement_rate: 5.5,
     fee_inr: 25000,
@@ -233,7 +222,6 @@ export const mockInfluencers: Influencer[] = [
     user_id: "",
     name: "Kabir Khanna",
     category: "celebrity",
-    niches: ["luxury", "lifestyle"],
     followers: 1200000,
     engagement_rate: 1.8,
     fee_inr: 500000,
@@ -246,7 +234,6 @@ export const mockInfluencers: Influencer[] = [
     user_id: "",
     name: "Meera Iyer",
     category: "micro",
-    niches: ["food", "cooking"],
     followers: 42000,
     engagement_rate: 4.2,
     fee_inr: 50000,
@@ -259,7 +246,6 @@ export const mockInfluencers: Influencer[] = [
     user_id: "",
     name: "Aditya Nair",
     category: "macro",
-    niches: ["finance", "business"],
     followers: 280000,
     engagement_rate: 2.5,
     fee_inr: 160000,
@@ -272,7 +258,6 @@ export const mockInfluencers: Influencer[] = [
     user_id: "",
     name: "Ritu Verma",
     category: "celebrity",
-    niches: ["fashion", "beauty"],
     followers: 950000,
     engagement_rate: 2.0,
     fee_inr: 350000,
@@ -285,7 +270,6 @@ export const mockInfluencers: Influencer[] = [
     user_id: "",
     name: "Siddharth Roy",
     category: "nano",
-    niches: ["tech", "gadgets"],
     followers: 7500,
     engagement_rate: 7.1,
     fee_inr: 12000,
@@ -298,7 +282,6 @@ export const mockInfluencers: Influencer[] = [
     user_id: "",
     name: "Tanvi Menon",
     category: "micro",
-    niches: ["travel", "photography"],
     followers: 60000,
     engagement_rate: 3.9,
     fee_inr: 70000,
@@ -311,7 +294,6 @@ export const mockInfluencers: Influencer[] = [
     user_id: "",
     name: "Vivek Choudhary",
     category: "macro",
-    niches: ["fitness", "wellness"],
     followers: 195000,
     engagement_rate: 2.8,
     fee_inr: 130000,
@@ -324,7 +306,6 @@ export const mockInfluencers: Influencer[] = [
     user_id: "",
     name: "Preeti Joshi",
     category: "nano",
-    niches: ["beauty", "makeup"],
     followers: 11000,
     engagement_rate: 6.0,
     fee_inr: 20000,
@@ -337,7 +318,6 @@ export const mockInfluencers: Influencer[] = [
     user_id: "",
     name: "Karan Saxena",
     category: "celebrity",
-    niches: ["entertainment", "music"],
     followers: 1500000,
     engagement_rate: 1.7,
     fee_inr: 800000,
@@ -882,14 +862,7 @@ export const filterInfluencers = (
 
 // Helper function to get campaigns for a specific brand
 export const getBrandCampaigns = (brandId: string): Campaign[] => {
-  console.log(`Getting campaigns for brand ID: ${brandId}`);
-  // If no brand ID provided or empty string, return an empty array
-  if (!brandId) return [];
-  
-  // Get campaigns for the specified brand
-  const campaigns = mockCampaigns.filter((campaign) => campaign.brand_id === brandId);
-  console.log(`Found ${campaigns.length} campaigns for brand ID ${brandId}`);
-  return campaigns;
+  return mockCampaigns.filter((campaign) => campaign.brand_id === brandId);
 };
 
 // Helper function to get influencers for a specific campaign
