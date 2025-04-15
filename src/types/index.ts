@@ -1,8 +1,34 @@
+
 export type UserRole = 'admin' | 'influencer' | 'brand';
 
 export type InfluencerCategory = 'nano' | 'micro' | 'macro' | 'celebrity';
 
-export type InfluencerNiche = 'fitness' | 'food' | 'cosmetics' | 'tech' | 'travel' | 'vlog' | 'fashion' | 'beauty' | 'lifestyle' | 'gaming' | 'education';
+export type InfluencerNiche = 
+  | 'fitness' 
+  | 'food' 
+  | 'cosmetics' 
+  | 'tech' 
+  | 'travel' 
+  | 'vlog' 
+  | 'fashion' 
+  | 'beauty' 
+  | 'lifestyle' 
+  | 'gaming' 
+  | 'education'
+  | 'gadgets'
+  | 'health'
+  | 'wellness'
+  | 'sports'
+  | 'art'
+  | 'design'
+  | 'business'
+  | 'luxury'
+  | 'cooking'
+  | 'finance'
+  | 'photography'
+  | 'makeup'
+  | 'entertainment'
+  | 'music';
 
 export type CampaignStatus = 'draft' | 'active' | 'completed';
 
