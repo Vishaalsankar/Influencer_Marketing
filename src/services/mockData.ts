@@ -1,4 +1,3 @@
-
 import { 
   User, 
   Influencer, 
@@ -10,7 +9,7 @@ import {
   InfluencerNiche 
 } from "@/types";
 
-// Mock Users
+// Mock Users - update profile images
 export const mockUsers: User[] = [
   {
     user_id: "1",
@@ -32,6 +31,7 @@ export const mockUsers: User[] = [
     role: "influencer",
     name: "Priya Sharma",
     created_at: "2023-01-03T00:00:00Z",
+    profile_image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330",
   },
   {
     user_id: "4",
@@ -53,6 +53,7 @@ export const mockUsers: User[] = [
     role: "influencer",
     name: "Amit Kumar",
     created_at: "2023-01-06T00:00:00Z",
+    profile_image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d",
   },
   {
     user_id: "7",
@@ -60,6 +61,7 @@ export const mockUsers: User[] = [
     role: "influencer",
     name: "Neha Gupta",
     created_at: "2023-01-07T00:00:00Z",
+    profile_image: "https://images.unsplash.com/photo-1488716820095-cbe80883c496",
   },
   {
     user_id: "8",
@@ -67,6 +69,7 @@ export const mockUsers: User[] = [
     role: "influencer",
     name: "Rahul Singh",
     created_at: "2023-01-08T00:00:00Z",
+    profile_image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e",
   },
   {
     user_id: "9",
@@ -84,7 +87,7 @@ export const mockUsers: User[] = [
   },
 ];
 
-// Mock Influencers
+// Mock Influencers - update with profile images
 export const mockInfluencers: Influencer[] = [
   {
     influencer_id: "1",
@@ -98,6 +101,7 @@ export const mockInfluencers: Influencer[] = [
     platform: "Instagram",
     audience_interests: ["fashion", "beauty"],
     status: "active",
+    profile_image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330",
   },
   {
     influencer_id: "2",
@@ -111,6 +115,7 @@ export const mockInfluencers: Influencer[] = [
     platform: "Instagram",
     audience_interests: ["tech", "gadgets"],
     status: "active",
+    profile_image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d",
   },
   {
     influencer_id: "3",
@@ -124,6 +129,7 @@ export const mockInfluencers: Influencer[] = [
     platform: "Instagram",
     audience_interests: ["fashion", "luxury", "travel"],
     status: "active",
+    profile_image: "https://images.unsplash.com/photo-1488716820095-cbe80883c496",
   },
   {
     influencer_id: "4",
@@ -137,6 +143,7 @@ export const mockInfluencers: Influencer[] = [
     platform: "Instagram",
     audience_interests: ["fitness", "nutrition", "health"],
     status: "active",
+    profile_image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e",
   },
   {
     influencer_id: "5",
@@ -150,6 +157,7 @@ export const mockInfluencers: Influencer[] = [
     platform: "Instagram",
     audience_interests: ["food", "cooking", "travel"],
     status: "active",
+    profile_image: "https://images.unsplash.com/photo-1517841905240-472988babdf9",
   },
   {
     influencer_id: "6",
