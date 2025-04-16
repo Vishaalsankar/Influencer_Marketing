@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -18,61 +17,6 @@ interface CampaignsListProps {
   title?: string;
   description?: string;
 }
-
-const CampaignStatusControl: React.FC<{
-  status: CampaignStatus;
-  onStatusChange: (status: CampaignStatus) => void;
-}> = ({ status, onStatusChange }) => {
-  const { toast } = useToast();
-
-  const handleStatusChange = (newStatus: CampaignStatus) => {
-    onStatusChange(newStatus);
-    toast({
-      title: "Campaign Status Updated",
-      description: `Campaign has been marked as ${newStatus}`,
-    });
-  };
-
-  return (
-    <Select value={status} onValueChange={(value: CampaignStatus) => handleStatusChange(value)}>
-      <SelectTrigger className="w-[120px]">
-        <SelectValue>
-          <Badge
-            className={
-              status === "active"
-                ? "bg-green-100 text-green-800"
-                : status === "draft"
-                ? "bg-gray-100 text-gray-800"
-                : "bg-blue-100 text-blue-800"
-            }
-          >
-            {status.charAt(0).toUpperCase() + status.slice(1)}
-          </Badge>
-        </SelectValue>
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value="draft">
-          <div className="flex items-center">
-            <FileEdit className="mr-2 h-4 w-4" />
-            Draft
-          </div>
-        </SelectItem>
-        <SelectItem value="active">
-          <div className="flex items-center">
-            <Play className="mr-2 h-4 w-4" />
-            Active
-          </div>
-        </SelectItem>
-        <SelectItem value="completed">
-          <div className="flex items-center">
-            <Pause className="mr-2 h-4 w-4" />
-            Completed
-          </div>
-        </SelectItem>
-      </SelectContent>
-    </Select>
-  );
-};
 
 const CampaignsList: React.FC<CampaignsListProps> = ({
   campaigns,
@@ -130,10 +74,48 @@ const CampaignsList: React.FC<CampaignsListProps> = ({
                   </TableCell>
                   <TableCell>
                     {isBrand && onStatusChange ? (
-                      <CampaignStatusControl
-                        status={campaign.status}
-                        onStatusChange={(newStatus) => onStatusChange(campaign.campaign_id, newStatus)}
-                      />
+                      <Select 
+                        value={campaign.status} 
+                        onValueChange={(newStatus: CampaignStatus) => 
+                          onStatusChange(campaign.campaign_id, newStatus)
+                        }
+                      >
+                        <SelectTrigger className="w-[120px]">
+                          <SelectValue>
+                            <Badge
+                              className={
+                                campaign.status === "active"
+                                  ? "bg-green-100 text-green-800"
+                                  : campaign.status === "draft"
+                                  ? "bg-gray-100 text-gray-800"
+                                  : "bg-blue-100 text-blue-800"
+                              }
+                            >
+                              {campaign.status.charAt(0).toUpperCase() + campaign.status.slice(1)}
+                            </Badge>
+                          </SelectValue>
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="draft">
+                            <div className="flex items-center">
+                              <FileEdit className="mr-2 h-4 w-4" />
+                              Draft
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="active">
+                            <div className="flex items-center">
+                              <Play className="mr-2 h-4 w-4" />
+                              Active
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="completed">
+                            <div className="flex items-center">
+                              <Pause className="mr-2 h-4 w-4" />
+                              Completed
+                            </div>
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
                     ) : (
                       <Badge
                         className={

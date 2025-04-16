@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import MainLayout from "@/components/layout/MainLayout";
 import CampaignsList from "@/components/CampaignsList";
@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { ArrowUp, DollarSign, Percent } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { getBrandCampaigns, getCampaignPerformance, updateCampaignStatus } from "@/services/mockData";
+import { supabase } from "@/integrations/supabase/client";
 import { formatINR, formatPercent } from "@/lib/formatters";
 import { Campaign, CampaignStatus } from "@/types";
 import { useToast } from "@/hooks/use-toast";
@@ -14,37 +14,107 @@ import { useToast } from "@/hooks/use-toast";
 const BrandPortal: React.FC = () => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [campaigns, setCampaigns] = React.useState(getBrandCampaigns(user?.user_id || ""));
+  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
+  
+  // Fetch campaigns from Supabase
+  const fetchCampaigns = async () => {
+    if (!user) return;
+
+    const { data, error } = await supabase
+      .from('campaigns')
+      .select('*')
+      .eq('user_id', user.user_id)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to load campaigns",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setCampaigns(data || []);
+  };
+
+  // Real-time subscription for campaigns
+  useEffect(() => {
+    // Initial fetch
+    fetchCampaigns();
+
+    // Set up real-time subscription
+    const channel = supabase
+      .channel('campaigns')
+      .on(
+        'postgres_changes', 
+        { 
+          event: '*', 
+          schema: 'public', 
+          table: 'campaigns',
+          filter: `user_id=eq.${user?.user_id}`
+        },
+        (payload) => {
+          switch(payload.eventType) {
+            case 'INSERT':
+              setCampaigns(prev => [payload.new as Campaign, ...prev]);
+              break;
+            case 'UPDATE':
+              setCampaigns(prev => prev.map(campaign => 
+                campaign.campaign_id === payload.new.campaign_id 
+                  ? payload.new as Campaign 
+                  : campaign
+              ));
+              break;
+            case 'DELETE':
+              setCampaigns(prev => prev.filter(campaign => 
+                campaign.campaign_id !== payload.old.campaign_id
+              ));
+              break;
+          }
+        }
+      )
+      .subscribe();
+
+    // Cleanup subscription
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.user_id]);
   
   // Calculate summary metrics
   const activeCampaigns = campaigns.filter(c => c.status === "active").length;
   const totalBudget = campaigns.reduce((sum, c) => sum + c.budget_inr, 0);
   
-  // Calculate average ROI
-  const campaignPerformances = campaigns.map(c => getCampaignPerformance(c.campaign_id));
+  // Calculate average ROI (keeping existing logic)
+  const campaignPerformances = campaigns.map(c => {
+    // This would ideally come from a Supabase query in a real app
+    return { roi_percent: 0 }; 
+  });
   const validPerformances = campaignPerformances.filter(p => p !== undefined);
   const averageRoi = validPerformances.length > 0
     ? validPerformances.reduce((sum, p) => sum + (p?.roi_percent || 0), 0) / validPerformances.length
     : 0;
 
-  const handleStatusChange = (campaignId: string, newStatus: CampaignStatus) => {
-    // Update mock data
-    updateCampaignStatus(campaignId, newStatus);
-    
-    // Update local state
-    setCampaigns(prevCampaigns =>
-      prevCampaigns.map(campaign =>
-        campaign.campaign_id === campaignId
-          ? { ...campaign, status: newStatus }
-          : campaign
-      )
-    );
-    
-    // Show success message
-    toast({
-      title: "Campaign Updated",
-      description: `Campaign status has been changed to ${newStatus}`,
-    });
+  // Status change handler using Supabase
+  const handleStatusChange = async (campaignId: string, newStatus: CampaignStatus) => {
+    const { error } = await supabase
+      .from('campaigns')
+      .update({ status: newStatus })
+      .eq('campaign_id', campaignId);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update campaign status",
+        variant: "destructive"
+      });
+    } else {
+      toast({
+        title: "Campaign Updated",
+        description: `Campaign status has been changed to ${newStatus}`,
+      });
+    }
   };
   
   return (
