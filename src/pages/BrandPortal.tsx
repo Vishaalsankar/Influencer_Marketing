@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Link } from "react-router-dom";
 import MainLayout from "@/components/layout/MainLayout";
@@ -7,12 +6,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { ArrowUp, ArrowDown, DollarSign, Percent } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { getBrandCampaigns, getCampaignPerformance } from "@/services/mockData";
+import { getBrandCampaigns, getCampaignPerformance, updateCampaignStatus } from "@/services/mockData";
 import { formatINR, formatPercent } from "@/lib/formatters";
+import { CampaignStatus } from "@/types";
 
 const BrandPortal: React.FC = () => {
   const { user } = useAuth();
-  const campaigns = getBrandCampaigns(user?.user_id || "");
+  const [campaigns, setCampaigns] = React.useState(getBrandCampaigns(user?.user_id || ""));
   
   // Calculate summary metrics
   const activeCampaigns = campaigns.filter(c => c.status === "active").length;
@@ -24,6 +24,20 @@ const BrandPortal: React.FC = () => {
   const averageRoi = validPerformances.length > 0
     ? validPerformances.reduce((sum, p) => sum + (p?.roi_percent || 0), 0) / validPerformances.length
     : 0;
+
+  const handleStatusChange = (campaignId: string, newStatus: CampaignStatus) => {
+    // In a real app, this would be an API call
+    updateCampaignStatus(campaignId, newStatus);
+    
+    // Update local state
+    setCampaigns(prevCampaigns =>
+      prevCampaigns.map(campaign =>
+        campaign.campaign_id === campaignId
+          ? { ...campaign, status: newStatus }
+          : campaign
+      )
+    );
+  };
   
   return (
     <MainLayout requiredRole="brand">
@@ -133,7 +147,10 @@ const BrandPortal: React.FC = () => {
           </Card>
         </div>
         
-        <CampaignsList campaigns={campaigns} />
+        <CampaignsList 
+          campaigns={campaigns} 
+          onStatusChange={handleStatusChange}
+        />
       </div>
     </MainLayout>
   );

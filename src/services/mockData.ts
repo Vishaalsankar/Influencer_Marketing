@@ -940,3 +940,11 @@ export const getFraudDetectionData = (): any[] => {
     };
   });
 };
+
+// Mock function to update campaign status
+export const updateCampaignStatus = (campaignId: string, newStatus: CampaignStatus) => {
+  const campaign = mockCampaigns.find(c => c.campaign_id === campaignId);
+  if (campaign) {
+    campaign.status = newStatus;
+  }
+};
