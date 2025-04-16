@@ -10,24 +10,26 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Play, Pause, FileEdit, Plus, ChevronRight } from "lucide-react";
 import { formatINR } from "@/lib/formatters";
 import { Campaign, CampaignStatus } from "@/types";
-import { toast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 interface CampaignsListProps {
   campaigns: Campaign[];
+  onStatusChange?: (campaignId: string, newStatus: CampaignStatus) => void;
   title?: string;
   description?: string;
-  onStatusChange?: (campaignId: string, newStatus: CampaignStatus) => void;
 }
 
 const CampaignStatusControl: React.FC<{
   status: CampaignStatus;
   onStatusChange: (status: CampaignStatus) => void;
 }> = ({ status, onStatusChange }) => {
+  const { toast } = useToast();
+
   const handleStatusChange = (newStatus: CampaignStatus) => {
     onStatusChange(newStatus);
     toast({
       title: "Campaign Status Updated",
-      description: `Campaign has been ${newStatus}`,
+      description: `Campaign has been marked as ${newStatus}`,
     });
   };
 
@@ -74,9 +76,9 @@ const CampaignStatusControl: React.FC<{
 
 const CampaignsList: React.FC<CampaignsListProps> = ({
   campaigns,
+  onStatusChange,
   title = "Your Campaigns",
   description = "View and manage your marketing campaigns",
-  onStatusChange,
 }) => {
   const { userRole } = useAuth();
   const isAdmin = userRole === "admin";

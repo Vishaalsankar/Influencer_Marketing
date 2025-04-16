@@ -1,3 +1,4 @@
+
 import { 
   User, 
   Influencer, 
@@ -6,7 +7,8 @@ import {
   PerformanceMetric, 
   FraudScore, 
   Product,
-  InfluencerNiche 
+  InfluencerNiche,
+  CampaignStatus
 } from "@/types";
 
 // Mock Users - update profile images

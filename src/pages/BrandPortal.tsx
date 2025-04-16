@@ -4,14 +4,16 @@ import MainLayout from "@/components/layout/MainLayout";
 import CampaignsList from "@/components/CampaignsList";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowUp, ArrowDown, DollarSign, Percent } from "lucide-react";
+import { ArrowUp, DollarSign, Percent } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { getBrandCampaigns, getCampaignPerformance, updateCampaignStatus } from "@/services/mockData";
 import { formatINR, formatPercent } from "@/lib/formatters";
-import { CampaignStatus } from "@/types";
+import { Campaign, CampaignStatus } from "@/types";
+import { useToast } from "@/hooks/use-toast";
 
 const BrandPortal: React.FC = () => {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [campaigns, setCampaigns] = React.useState(getBrandCampaigns(user?.user_id || ""));
   
   // Calculate summary metrics
@@ -26,7 +28,7 @@ const BrandPortal: React.FC = () => {
     : 0;
 
   const handleStatusChange = (campaignId: string, newStatus: CampaignStatus) => {
-    // In a real app, this would be an API call
+    // Update mock data
     updateCampaignStatus(campaignId, newStatus);
     
     // Update local state
@@ -37,6 +39,12 @@ const BrandPortal: React.FC = () => {
           : campaign
       )
     );
+    
+    // Show success message
+    toast({
+      title: "Campaign Updated",
+      description: `Campaign status has been changed to ${newStatus}`,
+    });
   };
   
   return (
