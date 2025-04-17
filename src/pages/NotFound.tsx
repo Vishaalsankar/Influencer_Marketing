@@ -36,12 +36,12 @@ const NotFound = () => {
         </p>
         
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button onClick={handleGoBack} variant="outline" className="gap-2">
+          <Button onClick={handleGoBack} variant="default" className="gap-2">
             <ArrowLeft className="h-4 w-4" />
             Go Back
           </Button>
           
-          <Button onClick={handleGoHome} className="gap-2">
+          <Button onClick={handleGoHome} variant="outline" className="gap-2">
             <Home className="h-4 w-4" />
             Return to Home
           </Button>

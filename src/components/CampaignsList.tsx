@@ -159,6 +159,7 @@ const CampaignsList: React.FC<CampaignsListProps> = ({
                       variant="ghost" 
                       size="sm" 
                       onClick={() => handleViewCampaign(campaign.campaign_id)}
+                      className="hover:bg-gray-100"
                     >
                       <span className="sr-only">View details</span>
                       <ChevronRight className="h-4 w-4" />

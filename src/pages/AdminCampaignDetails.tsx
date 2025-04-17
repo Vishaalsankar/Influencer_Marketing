@@ -12,15 +12,19 @@ import {
   FileText, 
   Users,
   ArrowLeft,
-  Edit
+  CheckCircle,
+  XCircle
 } from "lucide-react";
 import { useParams, useNavigate } from 'react-router-dom';
-import { mockCampaigns } from "@/services/mockData";
+import { mockCampaigns, updateCampaignStatus } from "@/services/mockData";
 import { formatINR, formatPercent } from "@/lib/formatters";
+import { useToast } from "@/hooks/use-toast";
+import { CampaignStatus } from "@/types";
 
-const BrandCampaignDetails: React.FC = () => {
+const AdminCampaignDetails: React.FC = () => {
   const { campaignId } = useParams<{ campaignId: string }>();
   const navigate = useNavigate();
+  const { toast } = useToast();
   
   // Find the campaign by ID (replace with actual Supabase query later)
   const campaign = mockCampaigns.find(c => c.campaign_id === campaignId);
@@ -29,14 +33,22 @@ const BrandCampaignDetails: React.FC = () => {
     navigate(-1); // Go back to the previous page
   };
 
-  const handleEdit = () => {
-    // This would navigate to edit page in a real implementation
-    console.log("Edit campaign:", campaignId);
+  const handleStatusChange = (newStatus: CampaignStatus) => {
+    if (campaign) {
+      // Update the campaign status
+      updateCampaignStatus(campaign.campaign_id, newStatus);
+      
+      // Show a toast notification
+      toast({
+        title: "Campaign Status Updated",
+        description: `Campaign has been marked as ${newStatus}`,
+      });
+    }
   };
 
   if (!campaign) {
     return (
-      <MainLayout requiredRole="brand">
+      <MainLayout requiredRole="admin">
         <div className="space-y-4">
           <Button onClick={handleGoBack} variant="outline" className="gap-2">
             <ArrowLeft className="h-4 w-4" />
@@ -49,7 +61,7 @@ const BrandCampaignDetails: React.FC = () => {
   }
 
   return (
-    <MainLayout requiredRole="brand">
+    <MainLayout requiredRole="admin">
       <div className="space-y-6">
         <Button onClick={handleGoBack} variant="outline" className="gap-2">
           <ArrowLeft className="h-4 w-4" />
@@ -84,18 +96,16 @@ const BrandCampaignDetails: React.FC = () => {
             <CardContent>
               <div className="space-y-2">
                 <div className="flex justify-between">
+                  <span>Brand ID:</span>
+                  <span className="font-semibold">{campaign.brand_id}</span>
+                </div>
+                <div className="flex justify-between">
                   <span>Category:</span>
                   <span className="font-semibold">{campaign.category}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Goals:</span>
                   <span className="font-semibold">{campaign.goals || "No goals specified"}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Description:</span>
-                  <span className="font-semibold">
-                    {campaign.goals || "Comprehensive marketing campaign to enhance brand visibility and engagement."}
-                  </span>
                 </div>
               </div>
             </CardContent>
@@ -212,17 +222,44 @@ const BrandCampaignDetails: React.FC = () => {
           </CardContent>
         </Card>
 
-        {/* Actions */}
+        {/* Admin Actions */}
         <div className="flex gap-4">
-          <Button variant="outline" onClick={handleEdit} className="gap-2">
-            <Edit className="h-4 w-4" />
-            Edit Campaign
-          </Button>
-          <Button>View Influencers</Button>
+          {campaign.status !== "active" && (
+            <Button 
+              variant="outline" 
+              className="gap-2"
+              onClick={() => handleStatusChange("active")}
+            >
+              <CheckCircle className="h-4 w-4" />
+              Approve Campaign
+            </Button>
+          )}
+          
+          {campaign.status === "active" && (
+            <Button 
+              variant="outline" 
+              className="gap-2"
+              onClick={() => handleStatusChange("completed")}
+            >
+              <CheckCircle className="h-4 w-4" />
+              Mark as Completed
+            </Button>
+          )}
+          
+          {campaign.status === "draft" && (
+            <Button 
+              variant="destructive" 
+              className="gap-2"
+              onClick={() => handleStatusChange("rejected")}
+            >
+              <XCircle className="h-4 w-4" />
+              Reject Campaign
+            </Button>
+          )}
         </div>
       </div>
     </MainLayout>
   );
 };
 
-export default BrandCampaignDetails;
+export default AdminCampaignDetails;
