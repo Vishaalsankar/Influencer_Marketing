@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -81,8 +81,14 @@ const CampaignsList: React.FC<CampaignsListProps> = ({
   description = "View and manage your marketing campaigns",
 }) => {
   const { userRole } = useAuth();
+  const navigate = useNavigate();
   const isAdmin = userRole === "admin";
   const isBrand = userRole === "brand";
+
+  const handleViewCampaign = (campaignId: string) => {
+    const route = isAdmin ? `/admin/campaigns/${campaignId}` : `/brand/campaigns/${campaignId}`;
+    navigate(route);
+  };
 
   return (
     <Card>
@@ -149,17 +155,13 @@ const CampaignsList: React.FC<CampaignsListProps> = ({
                     )}
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button variant="ghost" size="sm" asChild>
-                      <Link
-                        to={
-                          isAdmin
-                            ? `/admin/campaigns/${campaign.campaign_id}`
-                            : `/brand/campaigns/${campaign.campaign_id}`
-                        }
-                      >
-                        <span className="sr-only">View details</span>
-                        <ChevronRight className="h-4 w-4" />
-                      </Link>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => handleViewCampaign(campaign.campaign_id)}
+                    >
+                      <span className="sr-only">View details</span>
+                      <ChevronRight className="h-4 w-4" />
                     </Button>
                   </TableCell>
                 </TableRow>

@@ -10,22 +10,34 @@ import {
   Target, 
   TrendingUp, 
   FileText, 
-  Users 
+  Users,
+  ArrowLeft
 } from "lucide-react";
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { mockCampaigns } from "@/services/mockData";
 import { formatINR, formatPercent } from "@/lib/formatters";
 
 const BrandCampaignDetails: React.FC = () => {
   const { campaignId } = useParams<{ campaignId: string }>();
+  const navigate = useNavigate();
   
   // Find the campaign by ID (replace with actual Supabase query later)
   const campaign = mockCampaigns.find(c => c.campaign_id === campaignId);
 
+  const handleGoBack = () => {
+    navigate(-1); // Go back to the previous page
+  };
+
   if (!campaign) {
     return (
       <MainLayout requiredRole="brand">
-        <div className="text-center text-muted-foreground">Campaign not found</div>
+        <div className="space-y-4">
+          <Button onClick={handleGoBack} variant="outline" className="gap-2">
+            <ArrowLeft className="h-4 w-4" />
+            Go Back
+          </Button>
+          <div className="text-center text-muted-foreground">Campaign not found</div>
+        </div>
       </MainLayout>
     );
   }
@@ -33,6 +45,11 @@ const BrandCampaignDetails: React.FC = () => {
   return (
     <MainLayout requiredRole="brand">
       <div className="space-y-6">
+        <Button onClick={handleGoBack} variant="outline" className="gap-2">
+          <ArrowLeft className="h-4 w-4" />
+          Go Back
+        </Button>
+        
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-bold">{campaign.name}</h1>
           <Badge 
@@ -68,6 +85,12 @@ const BrandCampaignDetails: React.FC = () => {
                   <span>Goals:</span>
                   <span className="font-semibold">{campaign.goals}</span>
                 </div>
+                <div className="flex justify-between">
+                  <span>Description:</span>
+                  <span className="font-semibold">
+                    {campaign.description || "Comprehensive marketing campaign to enhance brand visibility and engagement."}
+                  </span>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -85,6 +108,14 @@ const BrandCampaignDetails: React.FC = () => {
                 <div className="flex justify-between">
                   <span>Total Budget:</span>
                   <span className="font-semibold inr">{formatINR(campaign.budget_inr)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Spent to Date:</span>
+                  <span className="font-semibold inr">{formatINR(campaign.budget_inr * 0.4)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Remaining:</span>
+                  <span className="font-semibold inr">{formatINR(campaign.budget_inr * 0.6)}</span>
                 </div>
               </div>
             </CardContent>
@@ -108,10 +139,72 @@ const BrandCampaignDetails: React.FC = () => {
                   <span>End Date:</span>
                   <span className="font-semibold">{new Date(campaign.end_date).toLocaleDateString()}</span>
                 </div>
+                <div className="flex justify-between">
+                  <span>Duration:</span>
+                  <span className="font-semibold">
+                    {Math.round((new Date(campaign.end_date).getTime() - new Date(campaign.start_date).getTime()) / (1000 * 60 * 60 * 24))} days
+                  </span>
+                </div>
               </div>
             </CardContent>
           </Card>
         </div>
+
+        {/* Performance Metrics */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <TrendingUp className="mr-2 h-5 w-5" />
+              Performance Metrics
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="bg-muted p-4 rounded-lg">
+                <h3 className="text-sm font-medium mb-1 text-muted-foreground">Engagement Rate</h3>
+                <p className="text-2xl font-bold">{formatPercent(0.042)}</p>
+              </div>
+              <div className="bg-muted p-4 rounded-lg">
+                <h3 className="text-sm font-medium mb-1 text-muted-foreground">Conversion Rate</h3>
+                <p className="text-2xl font-bold">{formatPercent(0.018)}</p>
+              </div>
+              <div className="bg-muted p-4 rounded-lg">
+                <h3 className="text-sm font-medium mb-1 text-muted-foreground">ROI</h3>
+                <p className="text-2xl font-bold">{formatPercent(0.235)}</p>
+              </div>
+              <div className="bg-muted p-4 rounded-lg">
+                <h3 className="text-sm font-medium mb-1 text-muted-foreground">Impressions</h3>
+                <p className="text-2xl font-bold">242.3K</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Influencer Participation */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Users className="mr-2 h-5 w-5" />
+              Influencer Participation
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Users className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="font-medium">5 Influencers</p>
+                    <p className="text-sm text-muted-foreground">Currently participating in this campaign</p>
+                  </div>
+                </div>
+                <Button variant="secondary" size="sm">View All</Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Actions */}
         <div className="flex gap-4">
