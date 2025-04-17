@@ -1,11 +1,10 @@
-
+import React, { useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
-import { useState } from "react";
 
 // Pages
 import Login from "./pages/Login";
@@ -25,6 +24,7 @@ import BrandPortal from "./pages/BrandPortal";
 import BrandInfluencerSearch from "./pages/BrandInfluencerSearch";
 import BrandAnalytics from "./pages/BrandAnalytics";
 import BrandCreateCampaign from "./pages/BrandCreateCampaign";
+import BrandCampaignDetails from "./pages/BrandCampaignDetails";
 
 // Influencer Portal Pages
 import InfluencerPortal from "./pages/InfluencerPortal";
@@ -32,7 +32,6 @@ import InfluencerCampaigns from "./pages/InfluencerCampaigns";
 import InfluencerEarnings from "./pages/InfluencerEarnings";
 
 const App = () => {
-  // Create a new QueryClient instance for each component render
   const [queryClient] = useState(() => new QueryClient());
 
   return (
@@ -60,6 +59,7 @@ const App = () => {
               <Route path="/brand/analytics" element={<BrandAnalytics />} />
               <Route path="/brand/create-campaign" element={<BrandCreateCampaign />} />
               <Route path="/brand/chat" element={<Chat />} />
+              <Route path="/brand/campaigns/:campaignId" element={<BrandCampaignDetails />} />
 
               {/* Influencer Portal Routes */}
               <Route path="/influencer" element={<InfluencerPortal />} />
