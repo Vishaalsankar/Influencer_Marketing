@@ -43,6 +43,7 @@ function App() {
             <Route path="/brand/influencer-search" element={<BrandInfluencerSearch />} />
             <Route path="/brand/analytics" element={<BrandAnalytics />} />
             <Route path="/brand/campaigns/:campaignId" element={<BrandCampaignDetails />} />
+            <Route path="/brand/chat" element={<Chat />} />
             
             {/* Influencer Routes */}
             <Route path="/influencer" element={<InfluencerPortal />} />

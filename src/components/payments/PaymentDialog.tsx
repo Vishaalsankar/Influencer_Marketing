@@ -39,11 +39,20 @@ export const PaymentDialog: React.FC<PaymentDialogProps> = ({
       return;
     }
 
+    if (!user) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to make a payment",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       setLoading(true);
       const { error } = await supabase.from('payments').insert({
         influencer_id: influencerId,
-        brand_id: user?.id,
+        brand_id: user.user_id, // Use user_id instead of id
         campaign_id: campaignId,
         amount_inr: amount,
         upi_id: upiId,
