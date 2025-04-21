@@ -1,4 +1,3 @@
-
 export type UserRole = 'admin' | 'influencer' | 'brand';
 
 export type InfluencerCategory = 'nano' | 'micro' | 'macro' | 'celebrity';
@@ -30,7 +29,7 @@ export type InfluencerNiche =
   | 'entertainment'
   | 'music';
 
-export type CampaignStatus = 'draft' | 'active' | 'completed';
+export type CampaignStatus = 'draft' | 'active' | 'completed' | 'rejected';
 
 export type ContentStatus = 'pending' | 'approved' | 'rejected';
 

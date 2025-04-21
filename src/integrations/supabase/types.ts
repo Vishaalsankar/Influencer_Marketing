@@ -107,6 +107,53 @@ export type Database = {
         }
         Relationships: []
       }
+      payments: {
+        Row: {
+          amount_inr: number
+          brand_id: string
+          campaign_id: string | null
+          created_at: string | null
+          id: string
+          influencer_id: string
+          status: Database["public"]["Enums"]["payment_status"] | null
+          transaction_reference: string | null
+          updated_at: string | null
+          upi_id: string | null
+        }
+        Insert: {
+          amount_inr: number
+          brand_id: string
+          campaign_id?: string | null
+          created_at?: string | null
+          id?: string
+          influencer_id: string
+          status?: Database["public"]["Enums"]["payment_status"] | null
+          transaction_reference?: string | null
+          updated_at?: string | null
+          upi_id?: string | null
+        }
+        Update: {
+          amount_inr?: number
+          brand_id?: string
+          campaign_id?: string | null
+          created_at?: string | null
+          id?: string
+          influencer_id?: string
+          status?: Database["public"]["Enums"]["payment_status"] | null
+          transaction_reference?: string | null
+          updated_at?: string | null
+          upi_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["campaign_id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           name: string
@@ -136,7 +183,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      payment_status: "pending" | "completed" | "failed"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -251,6 +298,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      payment_status: ["pending", "completed", "failed"],
+    },
   },
 } as const

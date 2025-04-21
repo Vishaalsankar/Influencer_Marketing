@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
@@ -10,6 +9,10 @@ import { formatINR, formatNumber, formatPercent } from "@/lib/formatters";
 import { filterInfluencers } from "@/services/mockData";
 import { Badge } from "@/components/ui/badge";
 import { Influencer, InfluencerCategory } from "@/types";
+import { Button } from "@/components/ui/button";
+import { MessageCircle } from "lucide-react";
+import { DollarSign } from "lucide-react";
+import { PaymentDialog } from "./payments/PaymentDialog";
 
 interface InfluencerRecommendationProps {
   onSelect?: (influencers: Influencer[]) => void;
@@ -61,9 +64,10 @@ const InfluencerRecommendation: React.FC<InfluencerRecommendationProps> = ({ onS
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [recommendedInfluencers, setRecommendedInfluencers] = useState<Influencer[]>([]);
   const [selectedInfluencers, setSelectedInfluencers] = useState<string[]>([]);
+  const [selectedInfluencer, setSelectedInfluencer] = useState<Influencer | null>(null);
+  const [showPaymentDialog, setShowPaymentDialog] = useState(false);
 
   useEffect(() => {
-    // Get filtered influencers based on budget range, category, and name search
     const filtered = filterInfluencers(budgetRange[0], budgetRange[1], selectedCategory)
       .filter(influencer => 
         influencer.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -87,6 +91,15 @@ const InfluencerRecommendation: React.FC<InfluencerRecommendationProps> = ({ onS
         return [...prev, influencerId];
       }
     });
+  };
+
+  const handleChatWithInfluencer = (influencer: Influencer) => {
+    // Implement chat functionality here
+  };
+
+  const handlePayInfluencer = (influencer: Influencer) => {
+    setSelectedInfluencer(influencer);
+    setShowPaymentDialog(true);
   };
 
   useEffect(() => {
@@ -204,6 +217,28 @@ const InfluencerRecommendation: React.FC<InfluencerRecommendationProps> = ({ onS
                       <TableCell>{formatNumber(influencer.followers)}</TableCell>
                       <TableCell>{formatPercent(influencer.engagement_rate)}</TableCell>
                       <TableCell className="inr font-medium">{formatINR(influencer.fee_inr)}</TableCell>
+                      <TableCell>
+                        <div className="flex gap-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="gap-2"
+                            onClick={() => handleChatWithInfluencer(influencer)}
+                          >
+                            <MessageCircle className="h-4 w-4" />
+                            Chat
+                          </Button>
+                          <Button 
+                            variant="outline"
+                            size="sm"
+                            className="gap-2"
+                            onClick={() => handlePayInfluencer(influencer)}
+                          >
+                            <DollarSign className="h-4 w-4" />
+                            Pay
+                          </Button>
+                        </div>
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -217,4 +252,3 @@ const InfluencerRecommendation: React.FC<InfluencerRecommendationProps> = ({ onS
 };
 
 export default InfluencerRecommendation;
-
