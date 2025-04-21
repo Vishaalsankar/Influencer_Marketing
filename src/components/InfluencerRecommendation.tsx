@@ -4,6 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
+import { Search } from "lucide-react";
 import { formatINR, formatNumber, formatPercent } from "@/lib/formatters";
 import { filterInfluencers } from "@/services/mockData";
 import { Badge } from "@/components/ui/badge";
@@ -56,14 +58,18 @@ const getCategoryBadge = (category: InfluencerCategory) => {
 const InfluencerRecommendation: React.FC<InfluencerRecommendationProps> = ({ onSelect }) => {
   const [budgetRange, setBudgetRange] = useState<[number, number]>([20000, 100000]);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState<string>("");
   const [recommendedInfluencers, setRecommendedInfluencers] = useState<Influencer[]>([]);
   const [selectedInfluencers, setSelectedInfluencers] = useState<string[]>([]);
 
   useEffect(() => {
-    // Get filtered influencers based on budget range and category
-    const filtered = filterInfluencers(budgetRange[0], budgetRange[1], selectedCategory);
+    // Get filtered influencers based on budget range, category, and name search
+    const filtered = filterInfluencers(budgetRange[0], budgetRange[1], selectedCategory)
+      .filter(influencer => 
+        influencer.name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
     setRecommendedInfluencers(filtered);
-  }, [budgetRange, selectedCategory]);
+  }, [budgetRange, selectedCategory, searchQuery]);
 
   const handleBudgetChange = (values: number[]) => {
     setBudgetRange([values[0], values[1]]);
@@ -102,11 +108,17 @@ const InfluencerRecommendation: React.FC<InfluencerRecommendationProps> = ({ onS
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-4 md:grid-cols-3">
+            <div className="relative">
+              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search by name..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9"
+              />
+            </div>
             <div>
-              <label className="text-sm font-medium mb-2 block">
-                Select Category
-              </label>
               <Select value={selectedCategory} onValueChange={handleCategoryChange}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select a category" />
@@ -143,6 +155,11 @@ const InfluencerRecommendation: React.FC<InfluencerRecommendationProps> = ({ onS
           <div className="mt-6">
             <h3 className="text-lg font-medium mb-3">Recommended Influencers</h3>
             <p className="text-sm text-muted-foreground mb-4">
+              {searchQuery && (
+                <span>
+                  Searching for "{searchQuery}"{" "}
+                </span>
+              )}
               Showing influencers with fees between{" "}
               <span className="inr font-medium">{formatINR(budgetRange[0])}</span> and{" "}
               <span className="inr font-medium">{formatINR(budgetRange[1])}</span>
@@ -200,3 +217,4 @@ const InfluencerRecommendation: React.FC<InfluencerRecommendationProps> = ({ onS
 };
 
 export default InfluencerRecommendation;
+
