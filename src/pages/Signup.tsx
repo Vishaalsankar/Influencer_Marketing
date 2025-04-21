@@ -6,17 +6,21 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { UserRole } from "@/types";
+import { PhoneVerification } from "@/components/auth/PhoneVerification";
+import { supabase } from "@/integrations/supabase/client";
 
 const Signup: React.FC = () => {
   const [name, setName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
+  const [phone, setPhone] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
   const [role, setRole] = useState<UserRole>("influencer");
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [showOtpVerification, setShowOtpVerification] = useState(false);
   const { signup, isAuthenticated, userRole } = useAuth();
   const { toast } = useToast();
 
@@ -35,10 +39,21 @@ const Signup: React.FC = () => {
     }
 
     try {
+      // First, sign up with email and password
       await signup(name, email, password, role);
+      
+      // Then initiate phone verification
+      const { error: phoneError } = await supabase.auth.signInWithOtp({
+        phone,
+      });
+
+      if (phoneError) throw phoneError;
+
+      setShowOtpVerification(true);
+      
       toast({
-        title: "Account created",
-        description: "Your account has been created successfully!",
+        title: "OTP Sent",
+        description: "Please check your phone for the verification code.",
       });
     } catch (error) {
       console.error("Signup error:", error);
@@ -52,7 +67,30 @@ const Signup: React.FC = () => {
     }
   };
 
-  // Redirect to appropriate dashboard if already authenticated
+  const handlePhoneVerified = async () => {
+    // Update the profile with verified phone number
+    const { error } = await supabase
+      .from('profiles')
+      .update({ 
+        phone_number: phone,
+        phone_verified: true 
+      })
+      .eq('user_id', supabase.auth.user()?.id);
+
+    if (error) {
+      console.error('Error updating profile:', error);
+      return;
+    }
+
+    // Redirect based on role
+    if (role === "brand") {
+      window.location.href = "/brand";
+    } else {
+      window.location.href = "/influencer";
+    }
+  };
+
+  // Redirect if already authenticated
   if (isAuthenticated) {
     if (userRole === "admin") {
       return <Navigate to="/admin" />;
@@ -61,6 +99,20 @@ const Signup: React.FC = () => {
     } else if (userRole === "influencer") {
       return <Navigate to="/influencer" />;
     }
+  }
+
+  if (showOtpVerification) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-blue-50 p-4">
+        <div className="w-full max-w-md">
+          <Card>
+            <CardContent className="pt-6">
+              <PhoneVerification phone={phone} onVerified={handlePhoneVerified} />
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -89,6 +141,17 @@ const Signup: React.FC = () => {
                     placeholder="Your Name"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="phone">Phone Number</Label>
+                  <Input
+                    id="phone"
+                    type="tel"
+                    placeholder="+1234567890"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
                     required
                   />
                 </div>
