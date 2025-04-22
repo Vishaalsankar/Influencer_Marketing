@@ -1,10 +1,12 @@
+
 import React from "react";
 import { Link } from "react-router-dom";
 import MainLayout from "@/components/layout/MainLayout";
 import CampaignsList from "@/components/CampaignsList";
+import ChatHistory from "@/components/ChatHistory";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowUp, DollarSign, Percent } from "lucide-react";
+import { ArrowUp, DollarSign, Percent, MessageSquare } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { getBrandCampaigns, getCampaignPerformance, updateCampaignStatus } from "@/services/mockData";
 import { formatINR, formatPercent } from "@/lib/formatters";
@@ -103,7 +105,7 @@ const BrandPortal: React.FC = () => {
             <CardHeader>
               <CardTitle>Quick Actions</CardTitle>
             </CardHeader>
-            <CardContent className="grid gap-4 grid-cols-1 sm:grid-cols-2">
+            <CardContent className="grid gap-4 grid-cols-1 sm:grid-cols-3">
               <Button asChild className="h-24" variant="outline">
                 <Link to="/brand/create-campaign">
                   <DollarSign className="h-6 w-6 mb-2" />
@@ -120,6 +122,16 @@ const BrandPortal: React.FC = () => {
                   <div>
                     <div className="font-medium">Find Influencers</div>
                     <div className="text-xs text-muted-foreground">Search and filter influencers</div>
+                  </div>
+                </Link>
+              </Button>
+              
+              <Button asChild className="h-24" variant="outline">
+                <Link to="/chat">
+                  <MessageSquare className="h-6 w-6 mb-2" />
+                  <div>
+                    <div className="font-medium">Messages</div>
+                    <div className="text-xs text-muted-foreground">Chat with influencers</div>
                   </div>
                 </Link>
               </Button>
@@ -155,10 +167,18 @@ const BrandPortal: React.FC = () => {
           </Card>
         </div>
         
-        <CampaignsList 
-          campaigns={campaigns} 
-          onStatusChange={handleStatusChange}
-        />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
+            <CampaignsList 
+              campaigns={campaigns} 
+              onStatusChange={handleStatusChange}
+            />
+          </div>
+          
+          <div>
+            <ChatHistory title="Recent Conversations" limit={3} />
+          </div>
+        </div>
       </div>
     </MainLayout>
   );

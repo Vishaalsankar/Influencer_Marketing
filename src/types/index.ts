@@ -56,6 +56,7 @@ export type Influencer = {
   status: 'active' | 'banned';
   profile_image?: string;
   bio?: string;
+  payment_qr_code?: string;
 };
 
 export type Product = {
