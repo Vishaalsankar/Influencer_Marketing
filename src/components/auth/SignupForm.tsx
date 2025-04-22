@@ -9,10 +9,9 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
 interface SignupFormProps {
-  onSignupSuccess: (phone: string) => void;
+  onSignupSuccess: () => void;
 }
 
-// Improved: Display more helpful error messages, improve field UX
 export const SignupForm: React.FC<SignupFormProps> = ({ onSignupSuccess }) => {
   const [name, setName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
@@ -27,10 +26,10 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onSignupSuccess }) => {
     e.preventDefault();
     setIsLoading(true);
 
-    if (!name || !email || !phone || !password || !confirmPassword || !role) {
+    if (!name || !email || !password || !confirmPassword || !role) {
       toast({
         title: "Missing fields",
-        description: "Please fill in all fields.",
+        description: "Please fill in all required fields.",
         variant: "destructive",
       });
       setIsLoading(false);
@@ -56,7 +55,8 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onSignupSuccess }) => {
           data: {
             name,
             role,
-          }
+          },
+          emailRedirectTo: window.location.origin + '/login'
         }
       });
 
@@ -64,14 +64,13 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onSignupSuccess }) => {
       if (!signUpData.user) throw new Error("Signup failed. Please try again.");
 
       // Create profile
-      // Fix: Used 'phone_number' instead of 'phone_Number' to match the actual column name in the database
       const { error: profileError } = await supabase
         .from('profiles')
         .insert({
           user_id: signUpData.user?.id,
           name,
           role,
-          phone_number: phone,
+          phone_number: phone || null,
         });
 
       if (profileError) {
@@ -79,22 +78,12 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onSignupSuccess }) => {
         throw new Error(`Profile creation failed: ${profileError.message}`);
       }
 
-      // Initiate phone verification
-      const { error: otpError } = await supabase.auth.signInWithOtp({
-        phone,
-      });
-
-      if (otpError) {
-        console.error("OTP error:", otpError);
-        throw otpError;
-      }
-
-      onSignupSuccess(phone);
-
       toast({
-        title: "OTP Sent",
-        description: "Please check your phone for the verification code.",
+        title: "Account created",
+        description: "Please check your email for confirmation instructions.",
       });
+
+      onSignupSuccess();
     } catch (error: any) {
       let errorMsg = "There was an error creating your account.";
       if (error?.message) errorMsg = error.message;
@@ -125,14 +114,13 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onSignupSuccess }) => {
           />
         </div>
         <div className="grid gap-2">
-          <Label htmlFor="phone">Phone Number</Label>
+          <Label htmlFor="phone">Phone Number (Optional)</Label>
           <Input
             id="phone"
             type="tel"
             placeholder="+1234567890"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
-            required
             autoComplete="tel"
           />
         </div>

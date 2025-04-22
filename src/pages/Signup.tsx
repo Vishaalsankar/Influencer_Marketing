@@ -1,29 +1,22 @@
 
-import React, { useState } from "react";
+import React from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { AuthLayout } from "@/components/auth/AuthLayout";
 import { SignupForm } from "@/components/auth/SignupForm";
-import { PhoneVerification } from "@/components/auth/PhoneVerification";
+import { useToast } from "@/hooks/use-toast";
 
-// Improved: Show error if signup fails or data missing; clear flows
 const Signup: React.FC = () => {
-  const [showOtpVerification, setShowOtpVerification] = useState(false);
-  const [verificationPhone, setVerificationPhone] = useState("");
   const { isAuthenticated, userRole } = useAuth();
+  const { toast } = useToast();
 
-  const handleSignupSuccess = (phone: string) => {
-    setVerificationPhone(phone);
-    setShowOtpVerification(true);
-  };
-
-  const handlePhoneVerified = () => {
-    // Redirect users based on their role after successful verification
-    if (userRole === "brand") {
-      window.location.href = "/brand";
-    } else {
-      window.location.href = "/influencer";
-    }
+  const handleSignupSuccess = () => {
+    toast({
+      title: "Signup successful",
+      description: "Please check your email for confirmation instructions",
+    });
+    // Redirect to login page
+    window.location.href = "/login";
   };
 
   // Redirect if already authenticated
@@ -35,19 +28,6 @@ const Signup: React.FC = () => {
     } else if (userRole === "influencer") {
       return <Navigate to="/influencer" />;
     }
-  }
-
-  if (showOtpVerification) {
-    return (
-      <AuthLayout
-        title="Verify your phone"
-        description="Enter the verification code sent to your phone."
-        footerText=""
-        footerLink={{ text: "", to: "" }}
-      >
-        <PhoneVerification phone={verificationPhone} onVerified={handlePhoneVerified} />
-      </AuthLayout>
-    );
   }
 
   return (
