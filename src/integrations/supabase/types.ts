@@ -157,18 +157,21 @@ export type Database = {
       profiles: {
         Row: {
           name: string
+          payment_qr_code: string | null
           profile_image: string | null
           role: string
           user_id: string
         }
         Insert: {
           name: string
+          payment_qr_code?: string | null
           profile_image?: string | null
           role: string
           user_id: string
         }
         Update: {
           name?: string
+          payment_qr_code?: string | null
           profile_image?: string | null
           role?: string
           user_id?: string

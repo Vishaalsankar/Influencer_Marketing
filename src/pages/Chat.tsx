@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import MainLayout from "@/components/layout/MainLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -34,6 +33,46 @@ const mockUsers = [
   },
 ];
 
+const mockMessages = [
+  {
+    message_id: "1",
+    sender_id: "demo-brand-1", 
+    receiver_id: "demo-influencer-1", 
+    content: "Hi! I really like your content and would love to discuss a potential collaboration for our upcoming campaign.",
+    timestamp: "2024-04-22T10:00:00Z",
+    is_read: true,
+    sender_role: "brand",
+  },
+  {
+    message_id: "2",
+    sender_id: "demo-influencer-1", 
+    receiver_id: "demo-brand-1", 
+    content: "Thank you for reaching out! I'd be happy to discuss the collaboration. Could you tell me more about your campaign?",
+    timestamp: "2024-04-22T10:05:00Z",
+    is_read: true,
+    sender_role: "influencer",
+  },
+  {
+    message_id: "3",
+    sender_id: "demo-brand-1", 
+    receiver_id: "demo-influencer-1", 
+    content: "We're launching a new sustainable fashion line and think your audience would be a great fit. Our budget is ₹25,000 for 2 Instagram posts.",
+    timestamp: "2024-04-22T10:10:00Z",
+    is_read: true,
+    sender_role: "brand",
+  },
+  {
+    message_id: "4",
+    sender_id: "demo-influencer-1", 
+    receiver_id: "demo-brand-1", 
+    content: "That sounds interesting! I'd love to learn more about the products and your brand values.",
+    timestamp: "2024-04-22T10:15:00Z",
+    is_read: true,
+    sender_role: "influencer",
+  }
+];
+
+// Modify the existing Chat component to include these mock messages as demo conversations
 const Chat: React.FC = () => {
   const { user } = useAuth();
   const [searchParams] = useSearchParams();
@@ -41,7 +80,7 @@ const Chat: React.FC = () => {
   const [contacts, setContacts] = useState<any[]>([]);
   const [filteredContacts, setFilteredContacts] = useState<any[]>([]);
   const [selectedContact, setSelectedContact] = useState<any | null>(null);
-  const [messages, setMessages] = useState<any[]>([]);
+  const [messages, setMessages] = useState<any[]>(mockMessages);
   const [newMessage, setNewMessage] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -334,36 +373,5 @@ const Chat: React.FC = () => {
     </MainLayout>
   );
 };
-
-// Mock messages for demo
-const mockMessages = [
-  {
-    message_id: "1",
-    sender_id: "2", // brand user
-    receiver_id: "3", // influencer user
-    content: "Hello! We're interested in working with you on our new product launch.",
-    timestamp: "2023-09-15T10:00:00Z",
-    is_read: true,
-    sender_role: "brand",
-  },
-  {
-    message_id: "2",
-    sender_id: "3", // influencer user
-    receiver_id: "2", // brand user
-    content: "Hi! Thank you for reaching out. I'd be interested in learning more about your campaign.",
-    timestamp: "2023-09-15T10:05:00Z",
-    is_read: true,
-    sender_role: "influencer",
-  },
-  {
-    message_id: "3",
-    sender_id: "2", // brand user
-    receiver_id: "3", // influencer user
-    content: "Great! We're launching a new line of eco-friendly products and we think your audience would love it.",
-    timestamp: "2023-09-15T10:10:00Z",
-    is_read: true,
-    sender_role: "brand",
-  },
-];
 
 export default Chat;

@@ -1,25 +1,17 @@
-
-import React from "react";
+import React, { useState } from "react";
 import MainLayout from "@/components/layout/MainLayout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAuth } from "@/contexts/AuthContext";
-import { mockInfluencers } from "@/services/mockData";
-import { formatINR, formatNumber, formatPercent } from "@/lib/formatters";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { InfluencerCategory, InfluencerNiche } from "@/types";
-import { Checkbox } from "@/components/ui/checkbox";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 const InfluencerPortal: React.FC = () => {
   const { user } = useAuth();
   
-  // Find the influencer profile for this user
   const influencerProfile = mockInfluencers.find(
     (inf) => inf.user_id === user?.user_id
   );
@@ -56,6 +48,10 @@ const InfluencerPortal: React.FC = () => {
   
   const [isEditing, setIsEditing] = React.useState(false);
   
+  const [paymentQRCode, setPaymentQRCode] = useState<string | null>(
+    influencerProfile?.payment_qr_code || null
+  );
+
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     
@@ -79,14 +75,57 @@ const InfluencerPortal: React.FC = () => {
   };
   
   const handleSave = () => {
-    // In a real app, this would call an API to update the profile
     setIsEditing(false);
     toast({
       title: "Profile updated",
       description: "Your profile has been updated successfully.",
     });
   };
-  
+
+  const handleQRCodeUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    
+    if (file) {
+      try {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${user?.user_id}_qr_code.${fileExt}`;
+        const filePath = `${fileName}`;
+
+        const { data, error: uploadError } = await supabase.storage
+          .from('qr-codes')
+          .upload(filePath, file, {
+            upsert: true
+          });
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('qr-codes')
+          .getPublicUrl(filePath);
+
+        const { error: profileUpdateError } = await supabase
+          .from('profiles')
+          .update({ payment_qr_code: publicUrl })
+          .eq('user_id', user?.user_id);
+
+        if (profileUpdateError) throw profileUpdateError;
+
+        setPaymentQRCode(publicUrl);
+        toast({
+          title: "QR Code Uploaded",
+          description: "Your payment QR code has been successfully uploaded.",
+        });
+      } catch (error) {
+        console.error("Error uploading QR code:", error);
+        toast({
+          title: "Upload Failed",
+          description: "There was an error uploading your QR code.",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
   return (
     <MainLayout requiredRole="influencer">
       <div className="space-y-6">
@@ -401,6 +440,44 @@ const InfluencerPortal: React.FC = () => {
           </div>
         </div>
       </div>
+      
+      {isEditing && (
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle>Payment QR Code</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center gap-4">
+              <Avatar className="h-24 w-24 border-2 border-primary/10">
+                <AvatarImage 
+                  src={paymentQRCode || "/placeholder.svg"} 
+                  alt="Payment QR Code" 
+                />
+                <AvatarFallback>QR</AvatarFallback>
+              </Avatar>
+              <div>
+                <Label htmlFor="qrCodeUpload" className="cursor-pointer">
+                  <Button variant="outline" asChild>
+                    <span>
+                      Upload QR Code
+                      <Input 
+                        id="qrCodeUpload" 
+                        type="file" 
+                        accept="image/*" 
+                        className="hidden" 
+                        onChange={handleQRCodeUpload}
+                      />
+                    </span>
+                  </Button>
+                </Label>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Upload your UPI or payment QR code
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </MainLayout>
   );
 };
