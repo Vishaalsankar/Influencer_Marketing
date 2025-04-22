@@ -1,16 +1,44 @@
+
 import React, { useState } from "react";
 import MainLayout from "@/components/layout/MainLayout";
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
+import { formatINR, formatNumber, formatPercent } from "@/lib/formatters";
+import { Influencer, InfluencerCategory, InfluencerNiche } from "@/types";
+import { useQuery } from "@tanstack/react-query";
 
 const InfluencerPortal: React.FC = () => {
   const { user } = useAuth();
+  const { toast } = useToast();
+  
+  // Mock data for development until we fetch from Supabase
+  const mockInfluencers: Influencer[] = [
+    {
+      influencer_id: "inf-1",
+      user_id: user?.user_id || "",
+      name: user?.name || "Demo Influencer",
+      category: "micro",
+      niches: ["fashion", "beauty"],
+      followers: 8000,
+      engagement_rate: 5.2,
+      fee_inr: 15000,
+      platform: "Instagram",
+      audience_interests: ["fashion", "beauty", "lifestyle"],
+      status: "active",
+      profile_image: user?.profile_image || "/placeholder.svg",
+      bio: "I'm a lifestyle influencer passionate about fashion and beauty products."
+    }
+  ];
   
   const influencerProfile = mockInfluencers.find(
     (inf) => inf.user_id === user?.user_id
