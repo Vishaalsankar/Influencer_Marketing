@@ -12,6 +12,7 @@ interface SignupFormProps {
   onSignupSuccess: (phone: string) => void;
 }
 
+// Improved: Display more helpful error messages, improve field UX
 export const SignupForm: React.FC<SignupFormProps> = ({ onSignupSuccess }) => {
   const [name, setName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
@@ -25,6 +26,16 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onSignupSuccess }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+
+    if (!name || !email || !phone || !password || !confirmPassword || !role) {
+      toast({
+        title: "Missing fields",
+        description: "Please fill in all fields.",
+        variant: "destructive",
+      });
+      setIsLoading(false);
+      return;
+    }
 
     if (password !== confirmPassword) {
       toast({
@@ -50,6 +61,7 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onSignupSuccess }) => {
       });
 
       if (signUpError) throw signUpError;
+      if (!signUpData.user) throw new Error("Signup failed. Please try again.");
 
       // Create profile
       const { error: profileError } = await supabase
@@ -71,16 +83,17 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onSignupSuccess }) => {
       if (otpError) throw otpError;
 
       onSignupSuccess(phone);
-      
+
       toast({
         title: "OTP Sent",
         description: "Please check your phone for the verification code.",
       });
-    } catch (error) {
-      console.error("Signup error:", error);
+    } catch (error: any) {
+      let errorMsg = "There was an error creating your account.";
+      if (error?.message) errorMsg = error.message;
       toast({
         title: "Signup failed",
-        description: "There was an error creating your account.",
+        description: errorMsg,
         variant: "destructive",
       });
     } finally {
@@ -89,7 +102,7 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onSignupSuccess }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} noValidate>
       <div className="grid gap-4">
         <div className="grid gap-2">
           <Label htmlFor="name">Full Name</Label>
@@ -100,6 +113,7 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onSignupSuccess }) => {
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
+            autoComplete="name"
           />
         </div>
         <div className="grid gap-2">
@@ -111,6 +125,7 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onSignupSuccess }) => {
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             required
+            autoComplete="tel"
           />
         </div>
         <div className="grid gap-2">
@@ -122,12 +137,13 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onSignupSuccess }) => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
+            autoComplete="email"
           />
         </div>
         <div className="grid gap-2">
           <Label htmlFor="role">Account Type</Label>
-          <Select 
-            value={role} 
+          <Select
+            value={role}
             onValueChange={(value: UserRole) => setRole(value)}
           >
             <SelectTrigger id="role">
@@ -146,8 +162,10 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onSignupSuccess }) => {
             type="password"
             placeholder="••••••••"
             value={password}
+            minLength={6}
             onChange={(e) => setPassword(e.target.value)}
             required
+            autoComplete="new-password"
           />
         </div>
         <div className="grid gap-2">
@@ -157,8 +175,10 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onSignupSuccess }) => {
             type="password"
             placeholder="••••••••"
             value={confirmPassword}
+            minLength={6}
             onChange={(e) => setConfirmPassword(e.target.value)}
             required
+            autoComplete="new-password"
           />
         </div>
         <Button type="submit" className="w-full mt-4" disabled={isLoading}>

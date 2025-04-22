@@ -6,6 +6,7 @@ import { AuthLayout } from "@/components/auth/AuthLayout";
 import { SignupForm } from "@/components/auth/SignupForm";
 import { PhoneVerification } from "@/components/auth/PhoneVerification";
 
+// Improved: Show error if signup fails or data missing; clear flows
 const Signup: React.FC = () => {
   const [showOtpVerification, setShowOtpVerification] = useState(false);
   const [verificationPhone, setVerificationPhone] = useState("");
@@ -39,7 +40,7 @@ const Signup: React.FC = () => {
     return (
       <AuthLayout
         title="Verify your phone"
-        description="Enter the verification code sent to your phone"
+        description="Enter the verification code sent to your phone."
         footerText=""
         footerLink={{ text: "", to: "" }}
       >

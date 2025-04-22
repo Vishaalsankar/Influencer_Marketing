@@ -1,4 +1,3 @@
-
 import React from 'react';
 import MainLayout from "@/components/layout/MainLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,11 +16,14 @@ import {
 import { useParams, useNavigate } from 'react-router-dom';
 import { mockCampaigns } from "@/services/mockData";
 import { formatINR, formatPercent } from "@/lib/formatters";
+import CampaignActionMenu from "@/components/CampaignActionMenu";
+import { useAuth } from "@/contexts/AuthContext";
 
 const BrandCampaignDetails: React.FC = () => {
   const { campaignId } = useParams<{ campaignId: string }>();
   const navigate = useNavigate();
-  
+  const { userRole } = useAuth();
+
   // Find the campaign by ID (replace with actual Supabase query later)
   const campaign = mockCampaigns.find(c => c.campaign_id === campaignId);
 
@@ -30,8 +32,19 @@ const BrandCampaignDetails: React.FC = () => {
   };
 
   const handleEdit = () => {
-    // This would navigate to edit page in a real implementation
     console.log("Edit campaign:", campaignId);
+  };
+
+  const handleUploadContent = () => {
+    console.log("Upload content action - implement upload flow here");
+  };
+
+  const handleUploadMemo = () => {
+    console.log("Upload memo action - implement upload memo flow here");
+  };
+
+  const handleUploadImage = () => {
+    console.log("Upload image - implement image upload flow here");
   };
 
   if (!campaign) {
@@ -214,11 +227,14 @@ const BrandCampaignDetails: React.FC = () => {
 
         {/* Actions */}
         <div className="flex gap-4">
-          <Button variant="outline" onClick={handleEdit} className="gap-2">
-            <Edit className="h-4 w-4" />
-            Edit Campaign
-          </Button>
-          <Button>View Influencers</Button>
+          <CampaignActionMenu
+            onEdit={handleEdit}
+            onUploadContent={handleUploadContent}
+            onUploadMemo={handleUploadMemo}
+            onUploadImage={handleUploadImage}
+            role={userRole === "influencer" ? "influencer" : "brand"}
+          />
+          {userRole === "brand" && <Button>View Influencers</Button>}
         </div>
       </div>
     </MainLayout>
