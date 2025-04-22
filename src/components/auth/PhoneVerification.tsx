@@ -24,7 +24,10 @@ export const PhoneVerification: React.FC<PhoneVerificationProps> = ({ phone, onV
         type: 'sms'
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('OTP verification error:', error);
+        throw error;
+      }
 
       toast({
         title: "Phone verified successfully",
@@ -32,11 +35,11 @@ export const PhoneVerification: React.FC<PhoneVerificationProps> = ({ phone, onV
       });
       
       onVerified();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error verifying OTP:', error);
       toast({
         title: "Verification failed",
-        description: "Please check your OTP and try again.",
+        description: error?.message || "Please check your OTP and try again.",
         variant: "destructive"
       });
     } finally {

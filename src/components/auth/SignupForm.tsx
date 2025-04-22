@@ -64,6 +64,7 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onSignupSuccess }) => {
       if (!signUpData.user) throw new Error("Signup failed. Please try again.");
 
       // Create profile
+      // Fix: Used 'phone_number' instead of 'phone_Number' to match the actual column name in the database
       const { error: profileError } = await supabase
         .from('profiles')
         .insert({
@@ -73,14 +74,20 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onSignupSuccess }) => {
           phone_number: phone,
         });
 
-      if (profileError) throw profileError;
+      if (profileError) {
+        console.error("Profile creation error:", profileError);
+        throw new Error(`Profile creation failed: ${profileError.message}`);
+      }
 
       // Initiate phone verification
       const { error: otpError } = await supabase.auth.signInWithOtp({
         phone,
       });
 
-      if (otpError) throw otpError;
+      if (otpError) {
+        console.error("OTP error:", otpError);
+        throw otpError;
+      }
 
       onSignupSuccess(phone);
 
@@ -96,6 +103,7 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onSignupSuccess }) => {
         description: errorMsg,
         variant: "destructive",
       });
+      console.error("Signup error details:", error);
     } finally {
       setIsLoading(false);
     }

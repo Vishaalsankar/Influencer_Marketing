@@ -18,6 +18,7 @@ const Signup: React.FC = () => {
   };
 
   const handlePhoneVerified = () => {
+    // Redirect users based on their role after successful verification
     if (userRole === "brand") {
       window.location.href = "/brand";
     } else {
